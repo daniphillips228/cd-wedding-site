@@ -938,3 +938,7 @@ ul { list-style: none; }
 
   .closing-headline { font-size: clamp(1.8rem, 6vw, 3rem); }
 }
+
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
