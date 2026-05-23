@@ -138,6 +138,12 @@
         return false;
       }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+          alert('Please enter a valid email address.');
+          return false;
+        }
+
       try {
         const token = await grecaptcha.execute('6LdgWPgsAAAAABflx2gn1W6NmlZf0jaLXWkRTpC3', { action: 'rsvp_submit' });
         document.getElementById('g-recaptcha-response').value = token;
