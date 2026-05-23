@@ -69,6 +69,8 @@ setInterval(updateCountdown, 1000);
 document.addEventListener('click', (e) => {
   const link = e.target.closest('a[href]');
   if (!link) return;
+  // skip if inside a form
+  if (e.target.closest('form')) return;
   const href = link.getAttribute('href');
   // skip hash-only, external, or blank-target links
   if (!href || href.startsWith('#') || href.startsWith('mailto:') || link.target === '_blank') return;
@@ -77,5 +79,3 @@ document.addEventListener('click', (e) => {
   document.body.style.opacity = '0';
   setTimeout(() => { window.location.href = href; }, 300);
 });
-
-
