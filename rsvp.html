@@ -123,6 +123,7 @@
   <script>
     const form = document.getElementById('rsvpForm');
     const successBox = document.getElementById('rsvpSuccess');
+    successBox.style.display = 'none';
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
