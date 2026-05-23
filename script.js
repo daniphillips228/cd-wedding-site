@@ -78,20 +78,4 @@ document.addEventListener('click', (e) => {
   setTimeout(() => { window.location.href = href; }, 300);
 });
 
-/* ---------- RSVP FORM ---------- */
-const rsvpForm = document.getElementById('rsvpForm');
-const rsvpSuccess = document.getElementById('rsvpSuccess');
 
-if (rsvpForm) {
-  rsvpForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    // In production: send to your backend / Formspree / Netlify Forms here
-    rsvpForm.style.opacity = '0';
-    rsvpForm.style.transform = 'translateY(-10px)';
-    rsvpForm.style.transition = 'opacity 0.4s, transform 0.4s';
-    setTimeout(() => {
-      rsvpForm.style.display = 'none';
-      if (rsvpSuccess) rsvpSuccess.classList.add('visible');
-    }, 400);
-  });
-}
