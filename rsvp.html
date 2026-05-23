@@ -19,16 +19,16 @@
       <li class="nav-item has-dropdown">
         <a href="index.html" class="nav-link">Home</a>
         <ul class="dropdown">
-          <li><a href="index.html#our-story">Our Story</a></li>
-          <li><a href="index.html#wedding-party">Wedding Party</a></li>
+          <li><a href="index.html#our-story">Our Story <span class="nav-soon">(Coming Soon)</span></a></li>
+          <li><a href="index.html#wedding-party">Wedding Party <span class="nav-soon">(Coming Soon)</span></a></li>
         </ul>
       </li>
       <li class="nav-item has-dropdown">
         <a href="#" class="nav-link">Details</a>
         <ul class="dropdown">
-          <li><a href="details.html#travel">Travel</a></li>
-          <li><a href="details.html#registry">Registry</a></li>
-          <li><a href="details.html#faqs">FAQs</a></li>
+          <li><a href="details.html#travel">Travel <span class="nav-soon">(Coming Soon)</span></a></li>
+          <li><a href="details.html#registry">Registry <span class="nav-soon">(Coming Soon)</span></a></li>
+          <li><a href="details.html#faqs">FAQs <span class="nav-soon">(Coming Soon)</span></a></li>
         </ul>
       </li>
       <li class="nav-item">
@@ -42,11 +42,11 @@
 
   <div class="mobile-menu" id="mobileMenu">
     <a href="index.html">Home</a>
-    <a href="index.html#our-story">Our Story</a>
-    <a href="index.html#wedding-party">Wedding Party</a>
-    <a href="details.html#travel">Travel</a>
-    <a href="details.html#registry">Registry</a>
-    <a href="details.html#faqs">FAQs</a>
+    <a href="index.html#our-story">Our Story <span class="nav-soon">(Coming Soon)</span></a>
+    <a href="index.html#wedding-party">Wedding Party <span class="nav-soon">(Coming Soon)</span></a>
+    <a href="details.html#travel">Travel <span class="nav-soon">(Coming Soon)</span></a>
+    <a href="details.html#registry">Registry <span class="nav-soon">(Coming Soon)</span></a>
+    <a href="details.html#faqs">FAQs <span class="nav-soon">(Coming Soon)</span></a>
     <a href="rsvp.html" class="mobile-rsvp">RSVP</a>
   </div>
 
@@ -100,19 +100,28 @@
         </div>
         <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" />
         <button type="submit" class="rsvp-submit">Submit</button>
-        <p class="rsvp-note">Your response will go directly to Chelsea & Derek. This site is protected by reCAPTCHA and the Google
+        <p class="rsvp-note">Your response will go directly to Chelsea & Derek.<br>
+          This site is protected by reCAPTCHA and the Google
           <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a> and
           <a href="https://policies.google.com/terms" target="_blank">Terms of Service</a> apply.
         </p>
 
       </form>
 
-      <!-- SUCCESS STATE -->
+      <!-- SUCCESS STATE: GOING -->
       <div class="rsvp-success" id="rsvpSuccess">
         <div class="rsvp-success-icon">🌅</div>
         <h3>See you on July 31st!</h3>
         <p>Chelsea and Derek are so happy you'll be there.<br>
         Check your email — details are on their way.</p>
+      </div>
+
+      <!-- SUCCESS STATE: NOT GOING -->
+      <div class="rsvp-success" id="rsvpSuccessDecline">
+        <div class="rsvp-success-icon">🤍</div>
+        <h3>You'll be missed.</h3>
+        <p>Chelsea <span class="rsvp-amp">&</span> Derek are sending you all their love —<br>
+        we'll be thinking of you on the big day.</p>
       </div>
 
     </div>
@@ -122,27 +131,80 @@
 
   <script>
     const form = document.getElementById('rsvpForm');
-    const successBox = document.getElementById('rsvpSuccess');
-    successBox.style.display = 'none';
+    const successGoing = document.getElementById('rsvpSuccess');
+    const successDecline = document.getElementById('rsvpSuccessDecline');
+    successGoing.style.display = 'none';
+    successDecline.style.display = 'none';
+
+    function showSuccess(box) {
+      form.style.transition = 'opacity 0.35s ease';
+      form.style.opacity = '0';
+      setTimeout(() => {
+        form.style.display = 'none';
+        box.style.opacity = '0';
+        box.style.display = 'block';
+        box.getBoundingClientRect(); // force reflow
+        box.style.transition = 'opacity 0.35s ease';
+        box.style.opacity = '1';
+      }, 350);
+    }
+
+    // Live error-clearing listeners
+    function clearError(field) {
+      field.closest('.form-group').classList.remove('field-error');
+    }
+    document.getElementById('firstName').addEventListener('input', function() { clearError(this); });
+    document.getElementById('lastName').addEventListener('input', function() { clearError(this); });
+    document.getElementById('email').addEventListener('input', function() { clearError(this); });
+    document.querySelectorAll('input[name="attendance"]').forEach(radio => {
+      radio.addEventListener('change', function() { clearError(this); });
+    });
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const firstName = document.getElementById('firstName').value.trim();
-      const lastName = document.getElementById('lastName').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const attendance = document.querySelector('input[name="attendance"]:checked');
+      const firstNameEl     = document.getElementById('firstName');
+      const lastNameEl      = document.getElementById('lastName');
+      const emailEl         = document.getElementById('email');
+      const attendance      = document.querySelector('input[name="attendance"]:checked');
+      const attendanceGroup = document.querySelector('input[name="attendance"]').closest('.form-group');
 
-      if (!firstName || !lastName || !email || !attendance) {
-        alert('Please fill out all required fields.');
-        return false;
+      let valid = true;
+
+      if (!firstNameEl.value.trim()) {
+        firstNameEl.closest('.form-group').classList.add('field-error');
+        valid = false;
+      } else {
+        firstNameEl.closest('.form-group').classList.remove('field-error');
       }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email || !emailRegex.test(email)) {
-          alert('Please enter a valid email address.');
-          return false;
-        }
+      if (!lastNameEl.value.trim()) {
+        lastNameEl.closest('.form-group').classList.add('field-error');
+        valid = false;
+      } else {
+        lastNameEl.closest('.form-group').classList.remove('field-error');
+      }
+
+      if (!emailEl.value.trim() || !emailEl.value.includes('@')) {
+        emailEl.closest('.form-group').classList.add('field-error');
+        valid = false;
+      } else {
+        emailEl.closest('.form-group').classList.remove('field-error');
+      }
+
+      if (!attendance) {
+        attendanceGroup.classList.add('field-error');
+        valid = false;
+      } else {
+        attendanceGroup.classList.remove('field-error');
+      }
+
+      if (!valid) {
+        alert('Please fill in all required fields before submitting.');
+        return;
+      }
+
+      form.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
 
       try {
         const token = await grecaptcha.execute('6LdgWPgsAAAAABflx2gn1W6NmlZf0jaLXWkRTpC3', { action: 'rsvp_submit' });
@@ -162,8 +224,7 @@
         });
 
         if (response.ok) {
-          form.style.display = 'none';
-          successBox.style.display = 'block';
+          showSuccess(attendance.value === 'yes' ? successGoing : successDecline);
         } else {
           alert('Something went wrong. Please try again.');
         }
