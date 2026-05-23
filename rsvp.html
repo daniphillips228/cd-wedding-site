@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSVP · Chelsea & Derek</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Cormorant+Infant:ital,wght@0,300;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="rsvp-body">
+
+  <!-- NAV -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-logo">C<span class="amp">&</span>D</a>
+    <ul class="nav-links">
+      <li class="nav-item has-dropdown">
+        <a href="index.html" class="nav-link">Home</a>
+        <ul class="dropdown">
+          <li><a href="index.html#our-story">Our Story</a></li>
+          <li><a href="index.html#wedding-party">Wedding Party</a></li>
+        </ul>
+      </li>
+      <li class="nav-item has-dropdown">
+        <a href="#" class="nav-link">Details</a>
+        <ul class="dropdown">
+          <li><a href="details.html#travel">Travel</a></li>
+          <li><a href="details.html#registry">Registry</a></li>
+          <li><a href="details.html#faqs">FAQs</a></li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a href="rsvp.html" class="nav-link nav-rsvp">RSVP</a>
+      </li>
+    </ul>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="index.html#our-story">Our Story</a>
+    <a href="index.html#wedding-party">Wedding Party</a>
+    <a href="details.html#travel">Travel</a>
+    <a href="details.html#registry">Registry</a>
+    <a href="details.html#faqs">FAQs</a>
+    <a href="rsvp.html" class="mobile-rsvp">RSVP</a>
+  </div>
+
+  <!-- RSVP PAGE -->
+  <main class="rsvp-page">
+    <div class="rsvp-card">
+
+      <p class="rsvp-card-eyebrow">— YOU'RE INVITED —</p>
+      <h1 class="rsvp-card-title">Chelsea <span class="rsvp-amp">&</span> Derek's Wedding</h1>
+      <p class="rsvp-venue">ROSEHILL COMMUNITY CENTER · MUKILTEO, WA</p>
+      <p class="rsvp-date-line">SATURDAY, JULY 31, 2027</p>
+      <p class="rsvp-respond-by">Please respond by <strong>June 18, 2027</strong></p>
+      <div class="rsvp-divider"></div>
+
+      <!-- FORM -->
+      <form class="rsvp-form" id="rsvpForm" novalidate>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name <span class="required-star">*</span></label>
+            <input type="text" id="firstName" name="firstName" placeholder="Jane" required />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name <span class="required-star">*</span></label>
+            <input type="text" id="lastName" name="lastName" placeholder="Doe" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address <span class="required-star">*</span></label>
+          <input type="email" id="email" name="email" placeholder="your@email.com" required />
+        </div>
+
+        <div class="form-group">
+          <label>Will you be attending? <span class="required-star">*</span></label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="attendance" value="yes" required />
+              Going
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="attendance" value="no" />
+              Not Going
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Leave a note for the couple</label>
+          <textarea id="message" name="message" placeholder="Wishes, memories, or a kind word..."></textarea>
+        </div>
+
+        <button type="submit" class="rsvp-submit">Submit</button>
+        <p class="rsvp-note">Your response will go directly to Chelsea & Derek.</p>
+
+      </form>
+
+      <!-- SUCCESS STATE -->
+      <div class="rsvp-success" id="rsvpSuccess">
+        <div class="rsvp-success-icon">🌅</div>
+        <h3>See you on July 31st!</h3>
+        <p>Chelsea and Derek are so happy you'll be there.<br>
+        Check your email — details are on their way.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

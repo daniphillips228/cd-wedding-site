@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chelsea & Derek · July 31, 2027</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Cormorant+Infant:ital,wght@0,300;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-logo">C<span class="amp">&</span>D</a>
+    <ul class="nav-links">
+      <li class="nav-item has-dropdown">
+        <a href="index.html" class="nav-link">Home</a>
+        <ul class="dropdown">
+          <li><a href="#our-story">Our Story</a></li>
+          <li><a href="#wedding-party">Wedding Party</a></li>
+        </ul>
+      </li>
+      <li class="nav-item has-dropdown">
+        <a href="#" class="nav-link">Details</a>
+        <ul class="dropdown">
+          <li><a href="details.html#travel">Travel</a></li>
+          <li><a href="details.html#registry">Registry</a></li>
+          <li><a href="details.html#faqs">FAQs</a></li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a href="rsvp.html" class="nav-link nav-rsvp">RSVP</a>
+      </li>
+    </ul>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="#our-story">Our Story</a>
+    <a href="#wedding-party">Wedding Party</a>
+    <a href="details.html#travel">Travel</a>
+    <a href="details.html#registry">Registry</a>
+    <a href="details.html#faqs">FAQs</a>
+    <a href="rsvp.html" class="mobile-rsvp">RSVP</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <p class="hero-eyebrow">WE'RE GETTING MARRIED</p>
+      <h1 class="hero-names">
+        <span class="name-chelsea">Chelsea</span>
+        <span class="hero-amp">&</span>
+        <span class="name-derek">Derek</span>
+      </h1>
+      <div class="hero-meta">
+        <span class="hero-date">SATURDAY, JULY 31, 2027</span>
+        <span class="hero-dot">·</span>
+        <span class="hero-location">Rosehill Community Center, Mukilteo, WA</span>
+      </div>
+    </div>
+
+    <!-- COUNTDOWN -->
+    <div class="countdown-bar">
+      <div class="countdown-inner">
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-days">—</span>
+          <span class="countdown-label">DAYS</span>
+        </div>
+        <div class="countdown-divider"></div>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-hours">—</span>
+          <span class="countdown-label">HOURS</span>
+        </div>
+        <div class="countdown-divider"></div>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-mins">—</span>
+          <span class="countdown-label">MINUTES</span>
+        </div>
+        <div class="countdown-divider"></div>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-secs">—</span>
+          <span class="countdown-label">SECONDS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll">
+      <span>SCROLL</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- GRADIENT RIVER wrapper — seamless scroll through all sections -->
+  <div class="gradient-river">
+
+  <section class="gradient-section" id="our-story">
+    <div class="section-inner">
+      <p class="chapter-label">— CHAPTER ONE —</p>
+      <h2 class="section-title">Our Story</h2>
+      <span class="pill-btn coming-soon-btn">COMING SOON</span>
+    </div>
+  </section>
+
+  <section class="gradient-section section-party" id="wedding-party">
+    <div class="section-inner">
+      <p class="chapter-label">— CHAPTER TWO —</p>
+      <h2 class="section-title">The Wedding Party</h2>
+      <div class="party-icons">
+        <div class="party-person"></div>
+        <div class="party-person"></div>
+        <div class="party-person"></div>
+        <div class="party-person"></div>
+        <div class="party-person"></div>
+        <div class="party-person"></div>
+      </div>
+      <span class="pill-btn coming-soon-btn">COMING SOON</span>
+    </div>
+  </section>
+
+  <!-- CLOSING CTA -->
+  <section class="closing-cta">
+    <div class="closing-inner">
+      <div class="closing-ornament">— ∿ —</div>
+      <h2 class="closing-headline">With joy <span class="closing-amp">&</span> laughter,<br>we can't wait to share this day with you.</h2>
+      <p class="closing-sub">SATURDAY <span class="closing-dot">·</span> JULY 31, 2027</p>
+      <a href="rsvp.html" class="rsvp-big-btn">RSVP BY JUNE 18, 2027</a>
+    </div>
+    <footer class="site-footer">
+      <span>Designed with love by Danielle Phillips</span>
+    </footer>
+  </section>
+
+  </div><!-- end .gradient-river -->
+
+  <script src="script.js"></script>
+</body>
+</html>
