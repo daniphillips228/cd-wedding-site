@@ -927,6 +927,15 @@ ul { list-style: none; }
   line-height: 1.7;
 }
 
+.rsvp-note-soft {
+  font-size: 0.78rem;
+  font-weight: 300;
+  color: rgba(28,46,94,0.45);
+  margin-top: 0.75rem;
+  letter-spacing: 0.02em;
+  font-family: var(--font-sans);
+}
+
 /* ============================================================
    RESPONSIVE
    ============================================================ */
