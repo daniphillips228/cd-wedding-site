@@ -236,6 +236,17 @@
 
       sendEmail
         .then(() => {
+          fetch('https://script.google.com/macros/s/AKfycbxWgJIoKIEchXiWl8P7AUXNs9x4VIeQn3VgOvyuVpupmPQt8DrlpWL28fqzt4mn9XccSg/exec', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              firstName: firstNameEl.value,
+              lastName: lastNameEl.value,
+              email: emailEl.value,
+              attendance: attendance.value === 'yes' ? 'Going' : 'Not Going',
+              message: document.getElementById('message').value,
+            })
+          });
           showSuccess(attendance.value === 'yes' ? successGoing : successDecline);
         })
         .catch((error) => {
