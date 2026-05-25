@@ -391,10 +391,10 @@ ul { list-style: none; }
 /* SCROLL INDICATOR */
 .hero-scroll {
   position: absolute;
-  bottom: 24px;
+  bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 2;
+  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -404,12 +404,13 @@ ul { list-style: none; }
   font-family: var(--font-sans);
   font-size: 0.55rem;
   letter-spacing: 0.22em;
-  color: rgba(255,255,255,0.35);
+  color: rgba(28,46,94,0.65);
+  text-shadow: 0 0 12px rgba(255,255,255,0.6);
 }
 .scroll-line {
   width: 1px;
-  height: 36px;
-  background: transparent;
+  height: 32px;
+  background: linear-gradient(to bottom, rgba(28,46,94,0.5), transparent);
   animation: scrollPulse 2s infinite;
 }
 
@@ -952,7 +953,7 @@ ul { list-style: none; }
   .hero-dot { display: none; }
 
   /* Countdown — shrink to fit 375px without overflowing */
-  .countdown-bar { bottom: 56px; }
+  .countdown-bar { bottom: 64px; }
   .countdown-inner { padding: 0.6rem 0.9rem; }
   .countdown-unit { padding: 0 0.55rem; }
   .countdown-num { font-size: 1.25rem; min-width: 1.8ch; }
