@@ -221,6 +221,18 @@ ul { list-style: none; }
   color: rgba(28,46,94,0.6);
 }
 
+.mobile-section-label {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--navy);
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(28,46,94,0.07);
+  display: block;
+}
+
 .mobile-menu a:last-child { border-bottom: none; }
 .mobile-rsvp {
   margin-top: 0.75rem;
