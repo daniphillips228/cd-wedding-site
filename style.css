@@ -970,7 +970,7 @@ ul { list-style: none; }
   .hero-dot { display: none; }
 
   /* Countdown — shrink to fit 375px without overflowing */
-  .countdown-bar { bottom: 64px; }
+  .countdown-bar { bottom: 90px; }
   .countdown-inner { padding: 0.6rem 0.9rem; }
   .countdown-unit { padding: 0 0.55rem; }
   .countdown-num { font-size: 1.25rem; min-width: 1.8ch; }
