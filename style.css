@@ -28,10 +28,10 @@
 
 /* ---------- RESET ---------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; overflow-x: hidden; background-color: #c9a8d4; }
+html { scroll-behavior: smooth; overflow-x: hidden; background-color: #fdf6ee; }
 body {
   font-family: var(--font-sans);
-  background-color: #c9a8d4;
+  background-color: #fdf6ee;
   color: var(--navy);
   overflow-x: hidden;
   animation: pageFadeIn 0.45s ease both;
