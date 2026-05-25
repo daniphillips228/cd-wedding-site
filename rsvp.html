@@ -238,7 +238,8 @@
         .then(() => {
           fetch('https://script.google.com/macros/s/AKfycbxWgJIoKIEchXiWl8P7AUXNs9x4VIeQn3VgOvyuVpupmPQt8DrlpWL28fqzt4mn9XccSg/exec', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
               firstName: firstNameEl.value,
               lastName: lastNameEl.value,
