@@ -224,22 +224,26 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
 
-      emailjs.send("service_51nvkcj", "template_a9bfctj", {
-        firstName: firstNameEl.value,
-        lastName: lastNameEl.value,
-        email: emailEl.value,
-        attendance: attendance.value === "yes" ? "Going" : "Not Going",
-        message: document.getElementById("message").value,
-      })
-      .then(() => {
-        showSuccess(attendance.value === 'yes' ? successGoing : successDecline);
-      })
-      .catch((error) => {
-        console.error("EmailJS error:", error);
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit';
-        alert('Something went wrong. Please try again.');
-      });
+      const sendEmail = attendance.value === "yes"
+        ?  emailjs.send("service_51nvkcj", "template_a9bfctj", {
+            firstName: firstNameEl.value,
+            lastName: lastNameEl.value,
+            email: emailEl.value,
+            attendance: "Going",
+            message: document.getElementById("message").value,
+          })
+        : Promise.resolve();
+
+      sendEmail
+        .then(() => {
+          showSuccess(attendance.value === 'yes' ? successGoing : successDecline);
+        })
+        .catch((error) => {
+          console.error("EmailJS error:", error);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit';
+          alert('Something went wrong. Please try again.');
+        });
     });
   </script> 
 
