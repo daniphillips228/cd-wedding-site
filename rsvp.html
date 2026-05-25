@@ -205,7 +205,7 @@
       }
 
       form.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
-
+      
       try {
         const token = await grecaptcha.execute('6LdgWPgsAAAAABflx2gn1W6NmlZf0jaLXWkRTpC3', { action: 'rsvp_submit' });
         document.getElementById('g-recaptcha-response').value = token;
@@ -216,7 +216,8 @@
 
       const formData = new FormData(form);
 
-      try {
+    //FORMSPREE BACKUP  
+    /*try {
         const response = await fetch('https://formspree.io/f/mwvzbgzp', {
           method: 'POST',
           body: formData,
@@ -230,9 +231,33 @@
         }
       } catch (err) {
         alert('Network error. Please check your connection and try again.');
-      }
+      } */
+
+      showSuccess(attendance.value === 'yes' ? successGoing : successDecline);
     });
   </script>
+
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+      emailjs.init("KYi2ZQI1OqsibsVW_");
+
+      document.getElementById("rsvpForm").addEventListener("submit", function(e) {
+        const attendance = document.querySelector('input[name="attendance"]:checked');
+        if (!attendance) return;
+
+        const templateParams = {
+          firstName: document.getElementById("firstName").value,
+          lastName: document.getElementById("lastName").value,
+          email: document.getElementById("email").value,
+          attendance: attendance.value === "yes" ? "Going" : "Not Going",
+          message: document.getElementById("message").value,
+        };
+
+        emailjs.send("service_51nvkcj", "template_a9bfctj", templateParams)
+          .catch((error) => console.error("EmailJS error:", error));
+      });
+  </script> 
 
 </body>
 </html>
