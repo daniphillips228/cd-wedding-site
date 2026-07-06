@@ -92,6 +92,12 @@
           </div>
         </div>
 
+        <!-- MAILING ADDRESS — only shows when "Yes" is selected -->
+        <div class="form-group" id="addressGroup" style="display: none;">
+          <label for="address">Mailing Address <span class="required-star">*</span></label>
+          <input type="text" id="address" name="address" placeholder="123 Main St, Apt 4, City, State ZIP" autocomplete="street-address" />
+        </div>
+
         <div class="form-group">
           <label for="message">Leave a note for the couple</label>
           <textarea id="message" name="message" placeholder="Wishes, memories, or a kind word..."></textarea>
@@ -164,8 +170,14 @@
     document.getElementById('firstName').addEventListener('input', function() { clearError(this); });
     document.getElementById('lastName').addEventListener('input', function() { clearError(this); });
     document.getElementById('email').addEventListener('input', function() { clearError(this); });
+    document.getElementById('address').addEventListener('input', function() { clearError(this); });
+    const addressGroup = document.getElementById('addressGroup');
     document.querySelectorAll('input[name="attendance"]').forEach(radio => {
-      radio.addEventListener('change', function() { clearError(this); });
+      radio.addEventListener('change', function() {
+        clearError(this);
+        addressGroup.style.display = this.value === 'yes' ? 'flex' : 'none';
+        if (this.value !== 'yes') addressGroup.classList.remove('field-error');
+      });
     });
 
     form.addEventListener('submit', async function (e) {
@@ -205,6 +217,16 @@
         valid = false;
       } else {
         attendanceGroup.classList.remove('field-error');
+      }
+
+      const addressEl = document.getElementById('address');
+      if (attendance && attendance.value === 'yes') {
+        if (!addressEl.value.trim()) {
+          addressEl.closest('.form-group').classList.add('field-error');
+          valid = false;
+        } else {
+          addressEl.closest('.form-group').classList.remove('field-error');
+        }
       }
 
       if (!valid) {
@@ -247,6 +269,7 @@
               lastName: lastNameEl.value,
               email: emailEl.value,
               attendance: attendance.value === 'yes' ? 'Going' : 'Not Going',
+              address: addressEl.value,
               message: document.getElementById('message').value,
             })
           });

@@ -699,7 +699,7 @@ ul { list-style: none; }
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.5);
   border-radius: 20px;
-  padding: 2rem 3rem;
+  padding: 1.5rem 3rem;
   max-width: 860px;
   width: 100%;
   box-shadow: 0 24px 80px rgba(28,46,94,0.12);
@@ -799,7 +799,7 @@ ul { list-style: none; }
 }
 
 /* Form */
-.rsvp-form { display: flex; flex-direction: column; gap: 0.75rem; }
+.rsvp-form { display: flex; flex-direction: column; gap: 0.6rem; }
 
 .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
 .form-group label {
@@ -914,7 +914,7 @@ ul { list-style: none; }
   background: var(--navy);
   border: none;
   border-radius: 999px;
-  padding: 1.5rem 2rem;
+  padding: 1.15rem 2rem;
   cursor: pointer;
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
   box-shadow: 0 6px 28px rgba(28,46,94,0.2);
