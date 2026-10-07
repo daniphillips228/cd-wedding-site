@@ -969,6 +969,48 @@ ul { list-style: none; }
   font-family: var(--font-sans);
 }
 
+/* One-RSVP-per-person notice */
+.rsvp-notice {
+  background: rgba(232,92,106,0.07);
+  border-left: 3px solid var(--coral);
+  border-radius: 10px;
+  padding: 0.75rem 1.1rem;
+  margin-bottom: 0.4rem;
+}
+.rsvp-notice-title {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--coral);
+  margin-bottom: 0.2rem;
+}
+.rsvp-notice-text {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 300;
+  line-height: 1.5;
+  color: rgba(28,46,94,0.75);
+}
+
+/* Little reminder under the name fields */
+.rsvp-name-hint {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(28,46,94,0.65);
+  margin-top: -0.3rem;
+  width: calc(50% - 0.5rem);
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .rsvp-notice { padding: 0.65rem 0.9rem; }
+  .rsvp-notice-title { font-size: 0.8rem; }
+  .rsvp-notice-text { font-size: 0.75rem; }
+}
+
 /* ============================================================
    RESPONSIVE
    ============================================================ */
