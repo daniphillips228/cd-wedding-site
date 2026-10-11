@@ -201,12 +201,12 @@
       var f0 = makeFlower(true), line0 = navLine(), y0 = line0 - f0.r * 1.3;   // fully tucked under the nav until its turn
       var target = line0 + 20 + rnd() * (H - line0 - 20);
       f0.y = y0;
-      if (W > 820 && i % 2 === 0) {                        // laptops: half do the opening shower...
+      if (false) {                                         // (opening burst removed: every flower falls steadily from the nav line)
         f0.intro = { age: 0, delay: (i / n) * 0.9 + rnd() * 0.25, dur: 1.1 + rnd() * 1.1, y0: y0, dist: target - y0 };
       } else {                                             // ...the rest trickle out from under the nav one by one, so the top never empties
         // phones: every flower just falls from the nav line at the normal pace, the first ones right away
-        var phone = W <= 820, k = phone ? i : (i - 1) / 2, streamN = phone ? n : Math.floor(n / 2);
-        f0.intro = { age: 0, delay: (phone ? 0 : 0.5) + (k + (phone && k === 0 ? 0 : rnd() * .6)) / streamN * (H - line0) / (phone ? 60 : 32), dur: 0.001, y0: y0, dist: 0 };
+        var phone = W <= 820, k = i, streamN = n;
+        f0.intro = { age: 0, delay: (k + (k === 0 ? 0 : rnd() * .6)) / streamN * (H - line0) / (phone ? 60 : 32), dur: 0.001, y0: y0, dist: 0 };
       }
       flowers.push(f0);
     }
