@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Cormorant+Infant:ital,wght@0,300;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -49,130 +50,69 @@
   </div>
 
   <!-- GRADIENT RIVER — full page below the nav -->
-  <div class="gradient-river" id="top">
+  <div class="gradient-river dp" id="top">
 
-    <!-- PAGE HERO -->
-    <section class="gradient-section details-hero-section">
-      <div class="section-inner">
-        <p class="chapter-label">— CHELSEA <span class="details-chapter-amp">&</span> DEREK —</p>
-        <h1 class="section-title">The Details</h1>
-        <p class="details-subtitle">Everything you need to know for the big day.</p>
+    <!-- FALLING FLOWERS (decorative, filled in by details.js) -->
+    <div class="dp-petals" aria-hidden="true"></div>
+
+    <!-- PAGE TOP -->
+    <header class="dp-hero">
+      <div class="dp-hero-wrap">
+        <div class="dp-hero-text">
+          <h1>The Details</h1>
+          <div class="dp-rule"></div>
+          <nav class="dp-jump" aria-label="Jump to a section">
+            <a href="#faqs">FAQs</a>
+            <a href="#travel">Travel</a>
+            <a href="#registry">Registry</a>
+          </nav>
+        </div>
+        <div class="dp-hero-photo">
+          <img src="CD2.JPG" alt="Chelsea showing her engagement ring at sunset" width="1000" height="1500">
+        </div>
       </div>
-    </section>
-
-    <!-- DIVIDER -->
-    <div class="details-divider" aria-hidden="true"><span>✦</span></div>
+    </header>
 
     <!-- FAQs -->
-    <section class="gradient-section" id="faqs">
-      <div class="section-inner">
-        <p class="chapter-label">— CHAPTER ONE —</p>
-        <h2 class="section-title">FAQs</h2>
-
-        <div class="faq-list">
-          <details class="faq-item">
-            <summary>Are my kids allowed to come?</summary>
-            <p class="faq-answer">If they're over 16, yes! If not, please reach out to us and we'll figure out some other options.</p>
-          </details>
-
-          <details class="faq-item">
-            <summary>Can I bring a plus one?</summary>
-            <p class="faq-answer">Nope :) Seating is limited, so we're being super intentional with everyone who's attending.</p>
-          </details>
-
-          <details class="faq-item">
-            <summary>What should I wear?</summary>
-            <p class="faq-answer">Picture black tie, high fashion! Elegant but also colorful. As long as you come dressed up, we'll love it. We also encourage you to dress in your culture or ethnicity. We'll absolutely love it!</p>
-            <p class="faq-answer"><strong>No sneakers, no jeans, no casual wear.</strong> You will not be let in.</p>
-          </details>
-
-          <details class="faq-item">
-            <summary>I'm traveling into town! Where should I stay?</summary>
-            <p class="faq-answer">We're putting together some hotel options and fun things to do before and after the wedding. Check out the <a href="#travel" class="faq-link">Travel section</a> for updates!</p>
-          </details>
-
-          <details class="faq-item">
-            <summary>Is there a wedding registry?</summary>
-            <p class="faq-answer">Yes! We'd really love contributions to our honeymoon, but if you'd rather not, we'll also have a list of things we need. Head to the <a href="#registry" class="faq-link">Registry section</a> for details.</p>
-          </details>
-
-          <details class="faq-item">
-            <summary>Is the wedding outdoors or indoors?</summary>
-            <p class="faq-answer">The ceremony and cocktail hour will be outdoors, and the reception will be indoors!</p>
-          </details>
-
-          <details class="faq-item">
-            <summary>Are pictures allowed during the wedding or reception?</summary>
-            <p class="faq-answer"><strong>No phones during the ceremony!</strong> We want everyone to enjoy the moment, so please keep phones put away. During the reception and everything else, go crazy!</p>
-          </details>
+    <section class="dp-faq" id="faqs">
+      <div class="dp-faq-grid">
+        <figure class="dp-faq-photo">
+          <img src="CD3.jpg" alt="Chelsea and Derek laughing together on a wooden deck" width="900" height="1350" loading="lazy">
+        </figure>
+        <div>
+          <h2>FAQs</h2>
+          <div class="dp-faq-list">
+            <details class="dp-faq-item"><summary>Are my kids allowed to come?<span class="dp-icon"></span></summary><p class="dp-ans">If they're over 16, yes! If not, please reach out to us, and we'll figure out some other options.</p></details>
+            <details class="dp-faq-item"><summary>Can I bring a plus one?<span class="dp-icon"></span></summary><p class="dp-ans">No. Seating is limited, so we're being super intentional with everyone who's attending.</p></details>
+            <details class="dp-faq-item"><summary>What should I wear?<span class="dp-icon"></span></summary><p class="dp-ans">Picture black tie, high fashion! Elegant, but also colorful. We encourage you to dress up and to also dress in your culture or ethnicity. We'll absolutely love it!</p><p class="dp-ans"><strong>No sneakers, no jeans, no casual wear.</strong> You will not be let in.</p></details>
+            <details class="dp-faq-item"><summary>I'm traveling into town! Where should I stay?<span class="dp-icon"></span></summary><p class="dp-ans">We're putting together hotel options and fun things to do before and after the wedding. Check out the <a href="#travel">Travel section</a> for updates!</p></details>
+            <details class="dp-faq-item"><summary>Is there a wedding registry?<span class="dp-icon"></span></summary><p class="dp-ans">Yes! We'd really love contributions to our honeymoon, but if you'd rather not, we'll also have a list of things we need. Head to the <a href="#registry">Registry section</a> for details.</p></details>
+            <details class="dp-faq-item"><summary>Is the wedding outdoors or indoors?<span class="dp-icon"></span></summary><p class="dp-ans">The ceremony and cocktail hour will be outdoors, and the reception will be indoors!</p></details>
+            <details class="dp-faq-item"><summary>Are pictures allowed during the wedding or reception?<span class="dp-icon"></span></summary><p class="dp-ans"><strong>No phones during the ceremony!</strong> We want everyone to enjoy the moment. During the reception and everything else, go crazy!</p></details>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- DIVIDER -->
-    <div class="details-divider" aria-hidden="true"><span>✦</span></div>
+    <div class="dp-divider" aria-hidden="true"><span>✦</span></div>
 
     <!-- TRAVEL -->
-    <section class="gradient-section" id="travel">
-      <div class="section-inner travel-inner">
-        <p class="chapter-label">— CHAPTER TWO —</p>
-        <h2 class="section-title">Travel</h2>
-        <p class="section-body">We're rounding up our favorite places to stay and play. Check back soon!</p>
-
-        <!-- WHERE TO STAY -->
-        <h3 class="travel-heading">Where to stay</h3>
-        <div class="travel-cards">
-          <!-- To fill in later: delete the "is-soon" class, the soon-stamp, and the skeleton lines,
-               then add the real hotel name, details, and link. -->
-          <div class="travel-card is-soon">
-            <p class="travel-tag">STAY</p>
-            <span class="soon-stamp">coming soon <svg class="soon-heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg></span>
-            <span class="skeleton-line"></span>
-            <span class="skeleton-line short"></span>
-          </div>
-          <div class="travel-card is-soon">
-            <p class="travel-tag">STAY</p>
-            <span class="soon-stamp">coming soon <svg class="soon-heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg></span>
-            <span class="skeleton-line"></span>
-            <span class="skeleton-line short"></span>
-          </div>
-        </div>
-
-        <!-- THINGS TO DO -->
-        <h3 class="travel-heading">Things to do</h3>
-        <div class="travel-cards">
-          <div class="travel-card is-soon">
-            <p class="travel-tag">EAT</p>
-            <span class="soon-stamp">coming soon <svg class="soon-heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg></span>
-            <span class="skeleton-line"></span>
-            <span class="skeleton-line short"></span>
-          </div>
-          <div class="travel-card is-soon">
-            <p class="travel-tag">EXPLORE</p>
-            <span class="soon-stamp">coming soon <svg class="soon-heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg></span>
-            <span class="skeleton-line"></span>
-            <span class="skeleton-line short"></span>
-          </div>
-          <div class="travel-card is-soon">
-            <p class="travel-tag">DRINK</p>
-            <span class="soon-stamp">coming soon <svg class="soon-heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg></span>
-            <span class="skeleton-line"></span>
-            <span class="skeleton-line short"></span>
-          </div>
-        </div>
-      </div>
+    <section class="dp-travel" id="travel">
+      <h2>Coming into town?</h2>
+      <p class="dp-soon">Coming soon</p>
     </section>
 
-    <!-- DIVIDER -->
-    <div class="details-divider" aria-hidden="true"><span>✦</span></div>
+    <div class="dp-divider" aria-hidden="true"><span>✦</span></div>
 
     <!-- REGISTRY -->
-    <section class="gradient-section" id="registry">
-      <div class="section-inner">
-        <p class="chapter-label">— CHAPTER THREE —</p>
-        <h2 class="section-title">Registry</h2>
-        <p class="section-body">Our registry is being lovingly curated — check back closer to the wedding.</p>
-        <span class="pill-btn coming-soon-btn">COMING SOON</span>
+    <section class="dp-registry" id="registry">
+      <div class="dp-registry-grid">
+        <div class="dp-registry-text">
+          <h2>Registry</h2>
+          <p>The biggest gift is you being there. If you'd like to give something, we'd love help with our honeymoon. We'll also share a short list of things we need.</p>
+          <span class="dp-btn" aria-disabled="true">Coming closer to the wedding</span>
+        </div>
+        <img class="dp-registry-photo" src="CD-registry.jpg" alt="Chelsea and Derek at sunset in front of a mountain reflected in an alpine lake" width="1600" height="1067" loading="lazy">
       </div>
     </section>
 
@@ -183,6 +123,6 @@
   </div><!-- end .gradient-river -->
 
   <script src="script.js"></script>
-  <script src="faq.js"></script>
+  <script src="details.js"></script>
 </body>
 </html>
