@@ -162,7 +162,8 @@
           for (var k = 0; k < mine.length; k++) { var dx = (mine[k][0] - fx) * w, dy = (mine[k][1] - fy) * h; if (dx * dx + dy * dy < md * md) { ok = false; break; } }
           if (!ok) continue;
           mine.push([fx, fy]);
-          var size = Math.round((8 + Math.round(rnd() * 5)) * (mode() === 'phone' ? 1.05 : 1.3));
+          var scale = mode() === 'phone' ? 1.05 : 1.3 * Math.min(Math.max(window.innerWidth / 1440, 1), 1.5);   // flowers grow with the page on big screens
+          var size = Math.round((8 + Math.round(rnd() * 5)) * scale);
           var wrap = document.createElement('div'); wrap.className = 'dp-flower';
           var svg = flowerSvg(size, COLORS[Math.floor(rnd() * 4)]);
           wrap.appendChild(svg); layer.appendChild(wrap);
