@@ -127,10 +127,12 @@
     function resize() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       var newW = window.innerWidth, newH = window.innerHeight, oldH = H || newH;
+      var widthChanged = newW !== W;
       W = newW; H = newH;
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (!widthChanged && flowers.length) return;         // phone address bar showing/hiding: just resize the canvas, leave the flowers alone
       sprites = {};
       flowers.forEach(function (f) { f.y = f.y / oldH * H; });  // keep vertical spot too
       var n = wanted();
