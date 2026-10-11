@@ -83,7 +83,7 @@
     var ctx = canvas.getContext('2d');
     var COLORS = [['#e85c6a', '#ffd84a'], ['#d4466a', '#ffd84a'], ['#ec6f58', '#ffe08a'], ['#c95078', '#ffd84a']];
     var bubble = document.querySelector('.dp-faq-grid > div'), footer = document.querySelector('.site-footer');
-    var W = 0, H = 0, dpr = 1, flowers = [], sprites = {}, last = null, running = false;
+    var W = 0, H = 0, dpr = 1, flowers = [], sprites = {}, last = null, running = false, fadeStart = null, FADE = 1.2;
 
     function seededRandom(seed) { return function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
     var rnd = seededRandom(7);
@@ -143,6 +143,8 @@
     }
 
     function draw(t) {
+      if (fadeStart === null) fadeStart = t;
+      var fade = reduceMotion ? 1 : Math.min((t - fadeStart) / FADE, 1);   // gentle fade-in when the page opens
       ctx.clearRect(0, 0, W, H);
       var limit = H;
       if (footer) { var fr = footer.getBoundingClientRect(); limit = Math.min(H, fr.top); }
@@ -156,7 +158,7 @@
       ctx.clip('evenodd');
       flowers.forEach(function (f) {
         var sp = sprite(f.ci, f.r), x = f.fx * W + Math.sin(t * f.swaySpeed + f.phase) * f.sway;
-        ctx.globalAlpha = f.alpha;
+        ctx.globalAlpha = f.alpha * fade;
         ctx.save(); ctx.translate(x, f.y); ctx.rotate(f.rot);
         ctx.drawImage(sp.img, -sp.size / 2, -sp.size / 2, sp.size, sp.size);
         ctx.restore();
@@ -180,7 +182,8 @@
     function start() { if (running) return; running = true; last = null; requestAnimationFrame(tick); }
 
     resize();
-    flowers = []; for (var i = 0, n = wanted(); i < n; i++) flowers.push(makeFlower(true));   // rain in from the top on load
+    // Start already spread across the screen (a few just above the top) so the rain is there right away
+    flowers = []; for (var i = 0, n = wanted(); i < n; i++) { var f0 = makeFlower(false); f0.y = -40 + rnd() * (H + 40); flowers.push(f0); }
 
     if (reduceMotion) {                                      // still scatter, no motion
       flowers.forEach(function (f) { f.y = rnd() * H; });
