@@ -1298,9 +1298,10 @@ ul { list-style: none; }
   border: 1px solid rgba(255,255,255,0.5);
   border-radius: 14px;
   overflow: hidden;
-  transition: background 0.2s;
+  transition: background 0.35s ease;
 }
-.faq-item[open] { background: rgba(253,246,238,0.85); }
+.faq-list:not(.faq-js) .faq-item[open],
+.faq-item.is-open { background: rgba(253,246,238,0.85); }
 
 .faq-item summary {
   list-style: none;
@@ -1325,7 +1326,8 @@ ul { list-style: none; }
   color: var(--coral);
   flex-shrink: 0;
 }
-.faq-item[open] summary::after { content: '–'; }
+.faq-list:not(.faq-js) .faq-item[open] summary::after,
+.faq-item.is-open summary::after { content: '–'; }
 .faq-item summary:hover { color: var(--coral); }
 .faq-item summary:focus-visible {
   outline: 2px solid var(--coral);
@@ -1349,8 +1351,34 @@ ul { list-style: none; }
   text-underline-offset: 3px;
 }
 
+/* ---------- DETAILS PAGE SPACING + DIVIDERS ---------- */
+.details-hero-section { padding-bottom: 2.5rem; }
+#travel, #faqs, #registry { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+#registry { padding-bottom: 5rem; } /* a little breathing room before the footer */
+#travel .travel-cards:last-child { margin-bottom: 0; }
+
+.details-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  color: var(--coral);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+.details-divider::before,
+.details-divider::after {
+  content: '';
+  width: 64px;
+  height: 1px;
+  background: rgba(28,46,94,0.25);
+}
+
 /* ---------- MOBILE ---------- */
 @media (max-width: 768px) {
+  .details-hero-section { padding-bottom: 2rem; }
+  #travel, #faqs, #registry { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+  #registry { padding-bottom: 4rem; }
   .travel-cards { grid-template-columns: 1fr; }
   .travel-card { min-height: 160px; }
   .faq-item summary { padding: 1.1rem 1.25rem; font-size: 1.05rem; }
