@@ -112,27 +112,32 @@
       // the middle gets a few. Positions are relative to the content edges so they adapt to any screen.
       var seed = 11; function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
       var spots = [];
-      function band(xMin, xMax, yMin, yMax, count) {          // scatter `count` flowers in a zone, kept apart
-        if (xMax - xMin < 36 || yMax - yMin < 30) return;
+      function band(xMin, xMax, yMin, yMax, count, gapMin) {          // scatter flowers in a zone, kept apart
+        if (yMax - yMin < 30) return;
+        if (!gapMin) count = Math.min(count, Math.floor((xMax - xMin) / 70)); else if (xMax - xMin < 40) return;   // skinny margins get none, so nothing gets squeezed
+        if (count <= 0) return;
         var placed = [];
-        for (var n = 0, tries = 0; n < count && tries < 60; tries++) {
+        for (var n = 0, tries = 0; n < count && tries < 80; tries++) {
           var x = xMin + rnd() * (xMax - xMin), y = yMin + rnd() * (yMax - yMin), ok = true;
-          for (var k = 0; k < placed.length; k++) { var dx = placed[k][0] - x, dy = placed[k][1] - y; if (dx * dx + dy * dy < 120 * 120) { ok = false; break; } }
+          for (var k = 0; k < spots.length; k++) { var dx = spots[k][0] - x, dy = spots[k][1] - y; var md = gapMin || 110; if (dx * dx + dy * dy < md * md) { ok = false; break; } }
           if (!ok) continue;
-          placed.push([x, y]); spots.push([x, y, 8 + Math.round(rnd() * 5), Math.floor(rnd() * 4)]); n++;
+          spots.push([x, y, 8 + Math.round(rnd() * 5), Math.floor(rnd() * 4)]); n++;
         }
       }
       var heroB = box('.dp-hero').b, faqList = box('.dp-faq-list'), regB = box('.dp-registry').b;
+      var bubbleL = box('.dp-faq-grid').l + box('.dp-faq-grid').r * 0 + (box('.dp-faq-grid').r - box('.dp-faq-grid').l) * .4;
       var archR = arch.r + 16, edge = 28;
-      // top section: outer margins + a light touch in the middle gap
+      // top section: the open gap between the title and the photo gets the most
+      band(title.r + 55, arch.l - 45, top + 30, heroB - 30, 4, 95);   // the gap beside the title always gets 4
+      band(title.l, links.r + 60, links.b + 40, heroB - 20, 1);
+      band(title.l, title.r, top + 24, title.t - 10, 1);
       band(edge, title.l - 40, top + 30, heroB - 40, 3);
       band(archR + 40, W - edge, top + 30, heroB - 40, 3);
-      band(title.l, title.r, top + 24, title.t - 10, 1);
-      band(links.r + 40, arch.l - 40, title.t, heroB - 60, 2);
-      // FAQs: left of the photo, between photo and bubble, right of the questions
+      // FAQs: only outside the bubble (left column), never inside it
+      band(edge, bubbleL - 40, faq.t + 10, fp.t - 20, 1);
       band(edge, fp.l - 30, faq.t + 20, faq.b - 40, 2);
-      band(fp.r + 24, W * .4 - 30, faq.t - 30, faq.b - 60, 2);
-      band(faqList.r + 40, W - edge, faq.t + 60, faq.b - 40, 2);
+      band(fp.r + 24, bubbleL - 30, faq.t + 20, faq.b - 60, 2);
+      band(edge, bubbleL - 40, fp.b + 20, faq.b - 20, 1);
       // Travel: both sides of the heading
       band(edge, travH.l - 60, travH.t - 30, soon.b + 70, 3);
       band(travH.r + 60, W - edge, travH.t - 30, soon.b + 70, 3);

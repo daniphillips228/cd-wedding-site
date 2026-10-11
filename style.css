@@ -1198,8 +1198,7 @@ ul { list-style: none; }
 .dp img { display: block; max-width: 100%; height: auto; }
 .dp a:focus-visible, .dp summary:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; }
 .dp #faqs, .dp #travel, .dp #registry { scroll-margin-top: 80px; }
-.dp-hero, .dp-travel, .dp-registry, .dp-divider { position: relative; z-index: 1; }
-.dp-faq { position: relative; }   /* no stacking context, so flowers can sit between the bubble and the content */
+.dp-hero, .dp-faq, .dp-travel, .dp-registry, .dp-divider { position: relative; z-index: 1; }
 @keyframes dpRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
 /* ---------- TOP ---------- */
@@ -1238,16 +1237,26 @@ ul { list-style: none; }
 
 /* ---------- FAQs ---------- */
 .dp-faq { padding: 5.5rem 0 4.5rem; }
-.dp-faq::before {
+.dp-faq-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40% 60%;
+  align-items: start;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.dp-faq-grid::before {                 /* the frosted bubble behind the questions */
   content: '';
   position: absolute;
-  inset: 0 0 0 40%;
+  top: -5.5rem;
+  bottom: -4.5rem;
+  left: 40%;
+  right: calc((100% - 100vw) / 2);     /* reaches the right edge of the screen */
   background: rgba(255,255,255,.35);
   border-top-left-radius: 180px;
-  z-index: 0;
+  z-index: -1;
 }
-.dp-faq-grid { position: relative; z-index: 2; display: grid; grid-template-columns: 40% 60%; align-items: start; }
-.dp-faq-grid > div { padding: 0 6vw 0 5vw; max-width: 780px; }
+.dp-faq-grid > div { justify-self: center; width: 100%; max-width: 760px; padding: 0 4vw; }
 .dp-faq-photo { width: min(25vw, 360px); margin: 0 auto; will-change: transform; }
 .dp-faq-photo img {
   width: 100%;
@@ -1340,7 +1349,7 @@ ul { list-style: none; }
 }
 
 /* ---------- FALLING FLOWERS ---------- */
-.dp-petals { position: absolute; top: 0; left: 0; width: 100%; height: 0; pointer-events: none; z-index: 1; }
+.dp-petals { position: absolute; top: 0; left: 0; width: 100%; height: 0; pointer-events: none; z-index: 0; }
 .dp-petals svg { position: absolute; overflow: visible; opacity: 0; }
 
 /* ---------- PHONES ---------- */
@@ -1351,9 +1360,10 @@ ul { list-style: none; }
   .dp-jump { justify-content: center; }
   .dp-hero-photo { justify-self: center; width: min(78%, 300px); }
   .dp-faq { padding-left: 1.5rem; padding-right: 1.5rem; }
-  .dp-faq::before { inset: 30% 0 0 0; border-top-left-radius: 90px; }
+  .dp-faq-grid::before { top: 30%; left: -1.5rem; right: -1.5rem; bottom: -4.5rem; border-top-left-radius: 90px; }
   .dp-faq-grid { grid-template-columns: 1fr; gap: 2.5rem; }
   .dp-faq-grid > div { padding: 0; max-width: none; }
+  .dp-faq-grid { z-index: 0; }
   .dp-faq-photo { width: 100%; max-width: 280px; }
   .dp-registry-grid { grid-template-columns: 1fr; gap: 1rem; text-align: center; }
   .dp-registry-photo { grid-row: 1; }
