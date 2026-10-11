@@ -1178,3 +1178,186 @@ ul { list-style: none; }
 .grecaptcha-badge {
   visibility: hidden !important;
 }
+/* ============================================================
+   DETAILS PAGE — TRAVEL CARDS + FAQ ACCORDION
+   Paste at the very bottom of style.css
+   ============================================================ */
+
+/* ---------- TRAVEL ---------- */
+.travel-inner { max-width: 900px; }
+
+.travel-heading {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  color: var(--navy);
+  margin: 1rem 0 1.25rem;
+}
+.travel-heading::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 1px;
+  background: var(--coral);
+  margin: 0.6rem auto 0;
+}
+
+.travel-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+}
+
+.travel-card {
+  position: relative;
+  background: rgba(253,246,238,0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem 2rem;
+  text-align: center;
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/* "Coming soon" placeholder look */
+.travel-card.is-soon {
+  border: 1.5px dashed rgba(28,46,94,0.25);
+  background: rgba(253,246,238,0.3);
+}
+
+.travel-tag {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  color: var(--coral);
+}
+
+.soon-stamp {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.7rem;
+  color: var(--navy);
+  display: inline-block;
+  transform: rotate(-4deg);
+  border: 1.5px solid rgba(232,92,106,0.55);
+  border-radius: 999px;
+  padding: 0.2rem 1.1rem 0.35rem;
+  background: rgba(253,246,238,0.6);
+}
+.soon-heart {
+  color: var(--coral);
+  display: inline-block;
+  animation: softBeat 2.4s ease-in-out infinite;
+}
+
+/* faint "text lines" so the card looks like content is loading in */
+.skeleton-line {
+  display: block;
+  height: 8px;
+  width: 75%;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    rgba(28,46,94,0.08) 0%,
+    rgba(28,46,94,0.16) 50%,
+    rgba(28,46,94,0.08) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.2s linear infinite;
+}
+.skeleton-line.short { width: 50%; }
+
+@keyframes softBeat {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.2); }
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ---------- FAQ ACCORDION ---------- */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  text-align: left;
+}
+
+.faq-item {
+  background: rgba(253,246,238,0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+.faq-item[open] { background: rgba(253,246,238,0.85); }
+
+.faq-item summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 1.25rem 1.5rem;
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--navy);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: '+';
+  font-size: 1.8rem;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--coral);
+  flex-shrink: 0;
+}
+.faq-item[open] summary::after { content: '–'; }
+.faq-item summary:hover { color: var(--coral); }
+.faq-item summary:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: -2px;
+  border-radius: 14px;
+}
+
+.faq-answer {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 300;
+  line-height: 1.75;
+  color: rgba(28,46,94,0.9);
+  padding: 0 1.5rem 1.25rem;
+}
+.faq-answer strong { font-weight: 500; color: var(--coral); }
+
+.faq-link {
+  color: var(--coral);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 768px) {
+  .travel-cards { grid-template-columns: 1fr; }
+  .travel-card { min-height: 160px; }
+  .faq-item summary { padding: 1.1rem 1.25rem; font-size: 1.05rem; }
+  .faq-answer { padding: 0 1.25rem 1.1rem; font-size: 1rem; }
+}
+
+/* Turn off the little animations for anyone who has "reduce motion" on */
+@media (prefers-reduced-motion: reduce) {
+  .soon-heart, .skeleton-line { animation: none; }
+}
