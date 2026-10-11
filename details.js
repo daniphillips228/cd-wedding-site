@@ -108,17 +108,38 @@
       var fp = box('.dp-faq-photo img'), faq = box('.dp-faq'), travH = box('.dp-travel h2', true), soon = box('.dp-soon', true);
       var W = document.documentElement.clientWidth, rt = box('.dp-registry-text'), rp = box('.dp-registry-photo'), btn = box('.dp-btn');
       var gap = (title.r + arch.l) / 2, fh = faq.b - faq.t;
-      // [x, y, size, colorIndex]
-      var spots = [
-        [title.l + 40, top + 46, 9, 1], [title.l + 170, top + 28, 8, 2], [title.r - 70, top + 72, 10, 3], [gap - 40, top + 70, 13, 0],
-        [gap + 30, title.t + 30, 8, 2], [gap - 10, title.b + 10, 10, 3], [links.r + 70, links.b + 34, 8, 1], [title.l + 150, links.b + 86, 11, 2],
-        [gap + 20, links.b + 110, 8, 0],
-        [W * .4 - 46, faq.t - 34, 10, 1], [fp.l + 18, fp.t + 34, 12, 0], [fp.r - 10, fp.t + fh * .42, 10, 1], [fp.l - 28, fp.t + fh * .5, 8, 2],
-        [fp.r + 34, faq.t + fh * .3, 8, 3], [fp.l + 40, fp.b - 6, 9, 1],
-        [travH.l - 150, travH.t + 20, 10, 2], [travH.r + 130, soon.b + 4, 12, 0], [travH.l - 60, soon.b + 40, 8, 1],
-        [(rt.r + rp.l) / 2, rp.t + 40, 9, 3], [btn.r + 60, btn.t + 10, 8, 1], [btn.l + 50, btn.b + 46, 9, 0], [btn.r - 40, btn.b + 84, 8, 2],
-        [btn.l + 150, btn.b + 120, 8, 3], [rp.r - 30, rp.t - 22, 11, 0], [rp.l + 90, rp.b + 30, 8, 2]
-      ];
+      // Spread flowers across the whole width: the open side margins get most of them,
+      // the middle gets a few. Positions are relative to the content edges so they adapt to any screen.
+      var seed = 11; function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+      var spots = [];
+      function band(xMin, xMax, yMin, yMax, count) {          // scatter `count` flowers in a zone, kept apart
+        if (xMax - xMin < 36 || yMax - yMin < 30) return;
+        var placed = [];
+        for (var n = 0, tries = 0; n < count && tries < 60; tries++) {
+          var x = xMin + rnd() * (xMax - xMin), y = yMin + rnd() * (yMax - yMin), ok = true;
+          for (var k = 0; k < placed.length; k++) { var dx = placed[k][0] - x, dy = placed[k][1] - y; if (dx * dx + dy * dy < 120 * 120) { ok = false; break; } }
+          if (!ok) continue;
+          placed.push([x, y]); spots.push([x, y, 8 + Math.round(rnd() * 5), Math.floor(rnd() * 4)]); n++;
+        }
+      }
+      var heroB = box('.dp-hero').b, faqList = box('.dp-faq-list'), regB = box('.dp-registry').b;
+      var archR = arch.r + 16, edge = 28;
+      // top section: outer margins + a light touch in the middle gap
+      band(edge, title.l - 40, top + 30, heroB - 40, 3);
+      band(archR + 40, W - edge, top + 30, heroB - 40, 3);
+      band(title.l, title.r, top + 24, title.t - 10, 1);
+      band(links.r + 40, arch.l - 40, title.t, heroB - 60, 2);
+      // FAQs: left of the photo, between photo and bubble, right of the questions
+      band(edge, fp.l - 30, faq.t + 20, faq.b - 40, 2);
+      band(fp.r + 24, W * .4 - 30, faq.t - 30, faq.b - 60, 2);
+      band(faqList.r + 40, W - edge, faq.t + 60, faq.b - 40, 2);
+      // Travel: both sides of the heading
+      band(edge, travH.l - 60, travH.t - 30, soon.b + 70, 3);
+      band(travH.r + 60, W - edge, travH.t - 30, soon.b + 70, 3);
+      // Registry: outer margins + under the button
+      band(edge, rt.l - 30, rp.t, regB - 40, 2);
+      band(rp.r + 30, W - edge, rp.t - 20, regB - 40, 2);
+      band(rt.l, rp.l - 30, btn.b + 30, regB - 40, 2);
       spots.forEach(function (sp, i) {
         var size = Math.round(sp[2] * 1.3), f = flower(size, COLORS[sp[3]]);
         f.style.left = (sp[0] - size) + 'px'; f.style.top = (sp[1] - size) + 'px';
