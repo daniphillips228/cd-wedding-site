@@ -1369,9 +1369,17 @@ ul { list-style: none; }
 .details-divider::before,
 .details-divider::after {
   content: '';
-  width: 64px;
+  width: 140px;
   height: 1px;
   background: rgba(28,46,94,0.25);
+}
+
+/* Section titles a step smaller than "The Details" so the page title leads */
+#travel .section-title,
+#faqs .section-title,
+#registry .section-title {
+  font-size: clamp(2.6rem, 6vw, 4.2rem);
+  margin-bottom: 1.75rem;
 }
 
 /* ---------- MOBILE ---------- */
@@ -1379,6 +1387,8 @@ ul { list-style: none; }
   .details-hero-section { padding-bottom: 2rem; }
   #travel, #faqs, #registry { padding-top: 2.5rem; padding-bottom: 2.5rem; }
   #registry { padding-bottom: 4rem; }
+  .details-divider::before,
+  .details-divider::after { width: 100px; }
   .travel-cards { grid-template-columns: 1fr; }
   .travel-card { min-height: 160px; }
   .faq-item summary { padding: 1.1rem 1.25rem; font-size: 1.05rem; }
