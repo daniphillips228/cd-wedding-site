@@ -68,7 +68,7 @@
     requestAnimationFrame(tick);
   })();
 
-  /* ---------- 3. FALLING FLOWERS (desktop only) ----------
+  /* ---------- 3. FALLING FLOWERS ----------
      Each flower belongs to a "zone" (an empty patch of the page, measured from the
      content around it) and remembers its relative spot inside that zone. On resize the
      same flowers glide to their new spots instead of being re-scattered. If a zone gets
@@ -78,7 +78,8 @@
     if (!layer) return;
     var NS = 'http://www.w3.org/2000/svg';
     var COLORS = [['#e85c6a', '#ffd84a'], ['#d4466a', '#ffd84a'], ['#ec6f58', '#ffe08a'], ['#c95078', '#ffd84a']];
-    var flowers = [], built = false, landed = false;
+    var flowers = [], built = false, builtFor = null;
+    function mode() { return window.innerWidth > 820 ? 'desktop' : 'phone'; }
 
     function box(sel, textOnly) {
       var n = document.querySelector(sel); if (!n) return null;
@@ -109,13 +110,26 @@
     function zones() {
       var W = document.documentElement.clientWidth, top = navBottom(), edge = 28;
       var title = box('.dp-hero-text h1', true), links = box('.dp-jump a:last-child'), arch = box('.dp-hero-photo');
-      var heroB = box('.dp-hero').b, faq = box('.dp-faq'), grid = box('.dp-faq-grid');
-      var fpEl = document.querySelector('.dp-faq-photo img'), fpR = fpEl.getBoundingClientRect();
+      var heroB = box('.dp-hero').b, faq = box('.dp-faq'), bubble = box('.dp-faq-grid > div');
+      var fpR = document.querySelector('.dp-faq-photo img').getBoundingClientRect();
       var shift = (document.querySelector('.dp-faq-photo').style.transform.match(/,\s*(-?[\d.]+)px/) || [0, 0])[1] * 1;
       var fp = { l: fpR.left + scrollX, r: fpR.right + scrollX, t: fpR.top + scrollY - shift, b: fpR.bottom + scrollY - shift };
-      var bubbleL = grid.l + (grid.r - grid.l) * .4;
       var travH = box('.dp-travel h2', true), soon = box('.dp-soon', true);
       var rt = box('.dp-registry-text'), rp = box('.dp-registry-photo'), btn = box('.dp-btn'), regB = box('.dp-registry').b;
+
+      if (mode() === 'phone') {             // a light sprinkle that fits a narrow screen
+        var archImg = box('.dp-hero-photo img');
+        return [
+          [16, W - 16, top + 14, title.t - 4, 1, true, 24],
+          [8, archImg.l - 14, archImg.t + 60, archImg.b - 30, 1, true, 24],
+          [archImg.r + 18, W - 8, archImg.t + 40, archImg.b - 60, 1, true, 24],
+          [16, W - 16, archImg.b + 30, bubble.t - 6, 1, true, 24],
+          [8, fp.l - 14, fp.t + 40, fp.b - 40, 1, true, 24],
+          [fp.r + 14, W - 8, fp.t + 30, fp.b - 50, 1, true, 24],
+          [16, W - 16, soon.b + 12, soon.b + 70, 1, true, 24],
+          [16, W - 16, btn.b + 24, regB - 20, 1, true, 24]
+        ];
+      }
       var archR = arch.r + 16;
       return [
         [title.r + 55, arch.l - 45, top + 30, heroB - 30, 4, true],     // the gap beside the title always gets 4
@@ -123,10 +137,11 @@
         [title.l, title.r, top + 24, title.t - 10, 1],
         [edge, title.l - 40, top + 30, heroB - 40, 3],
         [archR + 40, W - edge, top + 30, heroB - 40, 3],
-        [edge, bubbleL - 40, faq.t + 10, fp.t - 20, 1],                // FAQs: never inside the bubble
+        [edge, bubble.l - 40, faq.t + 10, fp.t - 20, 1],               // FAQs: never inside the bubble
         [edge, fp.l - 30, faq.t + 20, faq.b - 40, 2],
-        [fp.r + 24, bubbleL - 30, faq.t + 20, faq.b - 60, 2],
-        [edge, bubbleL - 40, fp.b + 20, faq.b - 20, 1],
+        [fp.r + 24, bubble.l - 30, faq.t + 20, faq.b - 60, 2],
+        [edge, bubble.l - 40, fp.b + 20, faq.b - 20, 1],
+        [bubble.r + 40, W - edge, faq.t + 40, faq.b - 40, 2],
         [edge, travH.l - 60, travH.t - 30, soon.b + 70, 3],
         [travH.r + 60, W - edge, travH.t - 30, soon.b + 70, 3],
         [edge, rt.l - 30, rp.t, regB - 40, 2],
@@ -147,7 +162,7 @@
           for (var k = 0; k < mine.length; k++) { var dx = (mine[k][0] - fx) * w, dy = (mine[k][1] - fy) * h; if (dx * dx + dy * dy < md * md) { ok = false; break; } }
           if (!ok) continue;
           mine.push([fx, fy]);
-          var size = Math.round((8 + Math.round(rnd() * 5)) * 1.3);
+          var size = Math.round((8 + Math.round(rnd() * 5)) * (mode() === 'phone' ? 1.05 : 1.3));
           var wrap = document.createElement('div'); wrap.className = 'dp-flower';
           var svg = flowerSvg(size, COLORS[Math.floor(rnd() * 4)]);
           wrap.appendChild(svg); layer.appendChild(wrap);
@@ -155,7 +170,7 @@
           n++;
         }
       });
-      built = true;
+      built = true; builtFor = mode();
     }
 
     /* Put each flower at its spot for the current layout; hide extras in skinny zones */
@@ -163,7 +178,7 @@
       var Z = zones();
       flowers.forEach(function (fl) {
         var z = Z[fl.zone], width = z[1] - z[0], height = z[3] - z[2];
-        var room = z[5] ? (width >= 40 ? z[4] : 0) : Math.min(z[4], Math.floor(width / 70));
+        var room = z[5] ? (width >= (z[6] || 40) ? z[4] : 0) : Math.min(z[4], Math.floor(width / 70));
         var show = height >= 30 && fl.rank < room;
         var W = document.documentElement.clientWidth;
         fl.x = Math.min(Math.max(z[0] + fl.fx * Math.max(width, 0), fl.size), W - fl.size); fl.y = z[2] + fl.fy * Math.max(height, 0);
@@ -190,24 +205,22 @@
     function showLanded() {
       flowers.forEach(function (fl) { fl.svg.style.opacity = 1; fl.svg.style.transform = 'rotate(' + ((fl.i * 47) % 360 + ((fl.i % 2) ? 110 : -130)) + 'deg)'; });
     }
-    function isDesktop() { return window.innerWidth > 820; }
 
     window.addEventListener('load', function () {
-      if (!isDesktop()) return;                       // phones: no flowers
       build(); layout();
       requestAnimationFrame(function () { layer.classList.add('dp-ready'); });   // turn on gliding after the first placement
       var top = navBottom();
-      setTimeout(function () { flowers.forEach(function (fl) { drop(fl, top); }); landed = true; }, 300);
+      setTimeout(function () { flowers.forEach(function (fl) { drop(fl, top); }); }, 300);
     });
 
-    // While the window is being resized, keep the flowers tracking their spots (once per frame)
+    // While the window is being resized, keep the flowers tracking their spots (once per frame).
+    // Crossing between phone and desktop layouts swaps to that layout's set, already landed.
     var pending = false;
     window.addEventListener('resize', function () {
       if (pending) return; pending = true;
       requestAnimationFrame(function () {
         pending = false;
-        if (!isDesktop()) return;                     // the CSS hides the layer on phones
-        if (!built) { build(); showLanded(); layer.classList.add('dp-ready'); }
+        if (!built || builtFor !== mode()) { layer.classList.remove('dp-ready'); build(); showLanded(); layout(); requestAnimationFrame(function () { layer.classList.add('dp-ready'); }); return; }
         layout();
       });
     });
