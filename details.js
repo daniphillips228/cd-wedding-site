@@ -48,6 +48,10 @@
       if (window.innerWidth <= 820) return 0;
       var vh = window.innerHeight, y = window.scrollY;
       var figR = fig.getBoundingClientRect(), listR = list.getBoundingClientRect();
+      // Pretend every answer is closed, so opening a question never moves the photo
+      var extra = 0;
+      list.querySelectorAll('.dp-faq-item[open]').forEach(function (it) { extra += it.offsetHeight - it.querySelector('summary').offsetHeight; });
+      listR = { bottom: listR.bottom - extra };
       var maxShift = Math.max(listR.bottom - (figR.bottom - cur), 0);
       var start = sec.getBoundingClientRect().top + y - vh * 0.55;
       var end = listR.bottom + y - vh * 0.98;
@@ -68,166 +72,125 @@
     requestAnimationFrame(tick);
   })();
 
-  /* ---------- 3. FALLING FLOWERS ----------
-     Each flower belongs to a "zone" (an empty patch of the page, measured from the
-     content around it) and remembers its relative spot inside that zone. On resize the
-     same flowers glide to their new spots instead of being re-scattered. If a zone gets
-     too skinny, its extra flowers fade out, and they fade back in when there's room. */
+  /* ---------- 3. FLOWER RAIN ----------
+     A light, endless shower of flowers drifting down behind the page content.
+     It's drawn on one fixed canvas, so scrolling never changes its speed, and each
+     flower remembers its spot as a share of the window width, so resizing never
+     makes them jump. Flowers are hidden inside the FAQ bubble and over the footer. */
   (function () {
-    var layer = document.querySelector('.dp-petals');
-    if (!layer) return;
-    var NS = 'http://www.w3.org/2000/svg';
+    var canvas = document.querySelector('.dp-rain');
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext('2d');
     var COLORS = [['#e85c6a', '#ffd84a'], ['#d4466a', '#ffd84a'], ['#ec6f58', '#ffe08a'], ['#c95078', '#ffd84a']];
-    var flowers = [], built = false, builtFor = null;
-    function mode() { return window.innerWidth > 820 ? 'desktop' : 'phone'; }
+    var bubble = document.querySelector('.dp-faq-grid > div'), footer = document.querySelector('.site-footer');
+    var W = 0, H = 0, dpr = 1, flowers = [], sprites = {}, last = null, running = false;
 
-    function box(sel, textOnly) {
-      var n = document.querySelector(sel); if (!n) return null;
-      var r;
-      if (textOnly) { var g = document.createRange(); g.selectNodeContents(n); r = g.getBoundingClientRect(); }
-      else r = n.getBoundingClientRect();
-      return { l: r.left + scrollX, r: r.right + scrollX, t: r.top + scrollY, b: r.bottom + scrollY };
-    }
-    function navBottom() { var n = document.querySelector('.navbar'); return n ? n.getBoundingClientRect().bottom + scrollY : 64; }
-    function flowerSvg(size, c) {
-      var svg = document.createElementNS(NS, 'svg');
-      svg.setAttribute('width', size * 2); svg.setAttribute('height', size * 2);
-      svg.setAttribute('viewBox', (-size) + ' ' + (-size) + ' ' + size * 2 + ' ' + size * 2);
+    function seededRandom(seed) { return function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+    var rnd = seededRandom(7);
+
+    // Pre-draw each flower once (per color and size) so the animation stays cheap
+    function sprite(ci, r) {
+      var key = ci + ':' + r; if (sprites[key]) return sprites[key];
+      var s = document.createElement('canvas'), size = Math.ceil(r * 2.4), c = s.getContext('2d');
+      s.width = s.height = Math.ceil(size * dpr);
+      c.scale(dpr, dpr); c.translate(size / 2, size / 2);
+      var col = COLORS[ci];
+      c.globalAlpha = .9; c.fillStyle = col[0];
       for (var i = 0; i < 5; i++) {
-        var a = i * 72 * Math.PI / 180, x = Math.cos(a) * size * .46, y = Math.sin(a) * size * .46;
-        var e = document.createElementNS(NS, 'ellipse');
-        e.setAttribute('cx', x); e.setAttribute('cy', y); e.setAttribute('rx', size * .42); e.setAttribute('ry', size * .3);
-        e.setAttribute('fill', c[0]); e.setAttribute('opacity', '.88');
-        e.setAttribute('transform', 'rotate(' + (i * 72) + ' ' + x + ' ' + y + ')');
-        svg.appendChild(e);
+        var a = i * 72 * Math.PI / 180;
+        c.save(); c.rotate(a); c.translate(r * .46, 0);
+        c.beginPath(); c.ellipse(0, 0, r * .42, r * .3, 0, 0, Math.PI * 2); c.fill(); c.restore();
       }
-      var d = document.createElementNS(NS, 'circle'); d.setAttribute('r', size * .2); d.setAttribute('fill', c[1]); svg.appendChild(d);
-      return svg;
+      c.globalAlpha = 1; c.fillStyle = col[1];
+      c.beginPath(); c.arc(0, 0, r * .2, 0, Math.PI * 2); c.fill();
+      return (sprites[key] = { img: s, size: size });
     }
 
-    /* The empty zones, measured fresh from the page every time the layout changes.
-       [xMin, xMax, yMin, yMax, wanted, alwaysShow] */
-    function zones() {
-      var W = document.documentElement.clientWidth, top = navBottom(), edge = 28;
-      var title = box('.dp-hero-text h1', true), links = box('.dp-jump a:last-child'), arch = box('.dp-hero-photo');
-      var heroB = box('.dp-hero').b, faq = box('.dp-faq'), bubble = box('.dp-faq-grid > div');
-      var fpR = document.querySelector('.dp-faq-photo img').getBoundingClientRect();
-      var shift = (document.querySelector('.dp-faq-photo').style.transform.match(/,\s*(-?[\d.]+)px/) || [0, 0])[1] * 1;
-      var fp = { l: fpR.left + scrollX, r: fpR.right + scrollX, t: fpR.top + scrollY - shift, b: fpR.bottom + scrollY - shift };
-      var travH = box('.dp-travel h2', true), soon = box('.dp-soon', true);
-      var rt = box('.dp-registry-text'), rp = box('.dp-registry-photo'), btn = box('.dp-btn'), regB = box('.dp-registry').b;
+    function scale() { return W <= 820 ? 1 : Math.min(Math.max(W / 1440, 1), 1.5); }
+    function wanted() { return W <= 820 ? 9 : Math.round(Math.min(Math.max(W * H / 52000, 18), 40)); }
 
-      if (mode() === 'phone') {             // a light sprinkle that fits a narrow screen
-        var archImg = box('.dp-hero-photo img');
-        return [
-          [16, W - 16, top + 14, title.t - 4, 1, true, 24],
-          [8, archImg.l - 14, archImg.t + 60, archImg.b - 30, 1, true, 24],
-          [archImg.r + 18, W - 8, archImg.t + 40, archImg.b - 60, 1, true, 24],
-          [16, W - 16, archImg.b + 30, bubble.t - 6, 1, true, 24],
-          [8, fp.l - 14, fp.t + 40, fp.b - 40, 1, true, 24],
-          [fp.r + 14, W - 8, fp.t + 30, fp.b - 50, 1, true, 24],
-          [16, W - 16, soon.b + 12, soon.b + 70, 1, true, 24],
-          [16, W - 16, btn.b + 24, regB - 20, 1, true, 24]
-        ];
-      }
-      var archR = arch.r + 16;
-      return [
-        [title.r + 55, arch.l - 45, top + 30, heroB - 30, 4, true],     // the gap beside the title always gets 4
-        [title.l, links.r + 60, links.b + 40, heroB - 20, 1],
-        [title.l, title.r, top + 24, title.t - 10, 1],
-        [edge, title.l - 40, top + 30, heroB - 40, 3],
-        [archR + 40, W - edge, top + 30, heroB - 40, 3],
-        [edge, bubble.l - 40, faq.t + 10, fp.t - 20, 1],               // FAQs: never inside the bubble
-        [edge, fp.l - 30, faq.t + 20, faq.b - 40, 2],
-        [fp.r + 24, bubble.l - 30, faq.t + 20, faq.b - 60, 2],
-        [edge, bubble.l - 40, fp.b + 20, faq.b - 20, 1],
-        [bubble.r + 40, W - edge, faq.t + 40, faq.b - 40, 2],
-        [edge, travH.l - 60, travH.t - 30, soon.b + 70, 3],
-        [travH.r + 60, W - edge, travH.t - 30, soon.b + 70, 3],
-        [edge, rt.l - 30, rp.t, regB - 40, 2],
-        [rp.r + 30, W - edge, rp.t - 20, regB - 40, 2],
-        [rt.l, rp.l - 30, btn.b + 30, regB - 40, 2]
-      ];
+    function makeFlower(startAbove) {
+      var depth = .55 + rnd() * .45;                         // smaller ones fall slower and look further away
+      var r = Math.round((7 + rnd() * 5) * depth * 1.25 * scale());
+      return {
+        fx: rnd(),                                           // horizontal spot as a share of the width
+        y: startAbove ? -rnd() * H - 20 : rnd() * H,
+        r: r, ci: Math.floor(rnd() * 4), depth: depth,
+        speed: (26 + rnd() * 22) * depth,                    // px per second, steady
+        sway: 10 + rnd() * 22, swaySpeed: .35 + rnd() * .5, phase: rnd() * Math.PI * 2,
+        rot: rnd() * Math.PI * 2, spin: (rnd() - .5) * .9, alpha: .55 + depth * .4
+      };
     }
 
-    /* Create every flower once, each with a fixed relative spot in its zone */
-    function build() {
-      layer.innerHTML = ''; flowers = [];
-      var seed = 11; function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
-      var Z = zones(), i = 0;
-      Z.forEach(function (z, zi) {
-        var w = Math.max(z[1] - z[0], 160), h = Math.max(z[3] - z[2], 60), md = z[5] ? 95 : 110, mine = [];
-        for (var n = 0, tries = 0; n < z[4] && tries < 80; tries++) {
-          var fx = rnd(), fy = rnd(), ok = true;
-          for (var k = 0; k < mine.length; k++) { var dx = (mine[k][0] - fx) * w, dy = (mine[k][1] - fy) * h; if (dx * dx + dy * dy < md * md) { ok = false; break; } }
-          if (!ok) continue;
-          mine.push([fx, fy]);
-          var scale = mode() === 'phone' ? 1.05 : 1.3 * Math.min(Math.max(window.innerWidth / 1440, 1), 1.5);   // flowers grow with the page on big screens
-          var size = Math.round((8 + Math.round(rnd() * 5)) * scale);
-          var wrap = document.createElement('div'); wrap.className = 'dp-flower';
-          var svg = flowerSvg(size, COLORS[Math.floor(rnd() * 4)]);
-          wrap.appendChild(svg); layer.appendChild(wrap);
-          flowers.push({ wrap: wrap, svg: svg, zone: zi, rank: n, fx: fx, fy: fy, size: size, i: i++, x: 0, y: 0 });
-          n++;
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var newW = window.innerWidth, newH = window.innerHeight, oldH = H || newH;
+      W = newW; H = newH;
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      sprites = {};
+      flowers.forEach(function (f) { f.y = f.y / oldH * H; });  // keep vertical spot too
+      var n = wanted();
+      while (flowers.length < n) flowers.push(makeFlower(flowers.length > 0 && last !== null));
+      if (flowers.length > n) flowers.length = n;
+    }
+
+    function holeRects() {                                   // areas where flowers shouldn't show
+      var holes = [];
+      if (bubble) { var b = bubble.getBoundingClientRect(); if (b.bottom > 0 && b.top < H) holes.push(b); }
+      return holes;
+    }
+
+    function draw(t) {
+      ctx.clearRect(0, 0, W, H);
+      var limit = H;
+      if (footer) { var fr = footer.getBoundingClientRect(); limit = Math.min(H, fr.top); }
+      ctx.save();
+      ctx.beginPath(); ctx.rect(0, 0, W, Math.max(limit, 0));
+      holeRects().forEach(function (b) {
+        var rad = Math.min(parseFloat(getComputedStyle(bubble).borderTopLeftRadius) || 0, b.height / 2, b.width / 2);
+        ctx.moveTo(b.left + rad, b.top); ctx.lineTo(b.right, b.top); ctx.lineTo(b.right, b.bottom); ctx.lineTo(b.left, b.bottom);
+        ctx.lineTo(b.left, b.top + rad); ctx.arcTo(b.left, b.top, b.left + rad, b.top, rad); ctx.closePath();
+      });
+      ctx.clip('evenodd');
+      flowers.forEach(function (f) {
+        var sp = sprite(f.ci, f.r), x = f.fx * W + Math.sin(t * f.swaySpeed + f.phase) * f.sway;
+        ctx.globalAlpha = f.alpha;
+        ctx.save(); ctx.translate(x, f.y); ctx.rotate(f.rot);
+        ctx.drawImage(sp.img, -sp.size / 2, -sp.size / 2, sp.size, sp.size);
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+
+    function tick(ts) {
+      var dt = last === null ? 0 : Math.min((ts - last) / 1000, .05); last = ts;
+      var t = ts / 1000;
+      flowers.forEach(function (f) {
+        f.y += f.speed * dt; f.rot += f.spin * dt;
+        if (f.y - f.r * 2 > H) {                             // drifted off the bottom: start again at the top
+          var nf = makeFlower(true); nf.y = -nf.r * 2 - rnd() * 60;
+          for (var k in nf) f[k] = nf[k];
         }
       });
-      built = true; builtFor = mode();
+      draw(t);
+      if (!document.hidden) requestAnimationFrame(tick); else { last = null; running = false; }
     }
+    function start() { if (running) return; running = true; last = null; requestAnimationFrame(tick); }
 
-    /* Put each flower at its spot for the current layout; hide extras in skinny zones */
-    function layout() {
-      var Z = zones();
-      flowers.forEach(function (fl) {
-        var z = Z[fl.zone], width = z[1] - z[0], height = z[3] - z[2];
-        var room = z[5] ? (width >= (z[6] || 40) ? z[4] : 0) : Math.min(z[4], Math.floor(width / 70));
-        var show = height >= 30 && fl.rank < room;
-        var W = document.documentElement.clientWidth;
-        fl.x = Math.min(Math.max(z[0] + fl.fx * Math.max(width, 0), fl.size), W - fl.size); fl.y = z[2] + fl.fy * Math.max(height, 0);
-        fl.wrap.style.left = (fl.x - fl.size) + 'px';
-        fl.wrap.style.top = (fl.y - fl.size) + 'px';
-        fl.wrap.style.opacity = show ? 1 : 0;
-      });
+    resize();
+    flowers = []; for (var i = 0, n = wanted(); i < n; i++) flowers.push(makeFlower(true));   // rain in from the top on load
+
+    if (reduceMotion) {                                      // still scatter, no motion
+      flowers.forEach(function (f) { f.y = rnd() * H; });
+      var still = function () { draw(0); };
+      still(); window.addEventListener('scroll', still, { passive: true });
+      window.addEventListener('resize', function () { resize(); still(); });
+      return;
     }
-
-    function drop(fl, top) {
-      var rot = (fl.i * 47) % 360, end = rot + ((fl.i % 2) ? 110 : -130);
-      if (reduceMotion || !fl.svg.animate) { fl.svg.style.opacity = 1; fl.svg.style.transform = 'rotate(' + end + 'deg)'; return; }
-      var fall = Math.min(fl.y - top + 20, 230), sway = 10 + (fl.i * 7) % 12;
-      var delay = (fl.y - top) * 1.5 + (fl.i * 137) % 260;   // the wave moves down the page
-      var dur = 1900 + (fl.i * 211) % 700;
-      fl.svg.animate([
-        { opacity: 0, transform: 'translate(0,' + (-fall) + 'px) rotate(' + rot + 'deg)' },
-        { opacity: 1, offset: .2, transform: 'translate(' + sway + 'px,' + (-fall * .75) + 'px) rotate(' + (rot + (end - rot) * .25) + 'deg)' },
-        { offset: .55, transform: 'translate(' + (-sway) + 'px,' + (-fall * .35) + 'px) rotate(' + (rot + (end - rot) * .6) + 'deg)' },
-        { offset: .85, transform: 'translate(' + (sway * .35) + 'px,' + (-fall * .08) + 'px) rotate(' + (end - 6) + 'deg)' },
-        { opacity: 1, transform: 'translate(0,0) rotate(' + end + 'deg)' }
-      ], { duration: dur, delay: delay, easing: 'cubic-bezier(.3,.1,.3,1)', fill: 'forwards' });
-    }
-    function showLanded() {
-      flowers.forEach(function (fl) { fl.svg.style.opacity = 1; fl.svg.style.transform = 'rotate(' + ((fl.i * 47) % 360 + ((fl.i % 2) ? 110 : -130)) + 'deg)'; });
-    }
-
-    window.addEventListener('load', function () {
-      build(); layout();
-      requestAnimationFrame(function () { layer.classList.add('dp-ready'); });   // turn on gliding after the first placement
-      var top = navBottom();
-      setTimeout(function () { flowers.forEach(function (fl) { drop(fl, top); }); }, 300);
-    });
-
-    // While the window is being resized, keep the flowers tracking their spots (once per frame).
-    // Crossing between phone and desktop layouts swaps to that layout's set, already landed.
-    var pending = false;
-    window.addEventListener('resize', function () {
-      if (pending) return; pending = true;
-      requestAnimationFrame(function () {
-        pending = false;
-        if (!built || builtFor !== mode()) { layer.classList.remove('dp-ready'); build(); showLanded(); layout(); requestAnimationFrame(function () { layer.classList.add('dp-ready'); }); return; }
-        layout();
-      });
-    });
-    // Opening an FAQ answer changes the page height, so nudge the lower flowers along with it
-    document.querySelectorAll('.dp-faq-item summary').forEach(function (s) {
-      s.addEventListener('click', function () { if (built) setTimeout(layout, 380); });
-    });
+    window.addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) start(); });
+    start();
   })();
 })();
