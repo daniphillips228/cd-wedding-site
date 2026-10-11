@@ -68,13 +68,17 @@
     requestAnimationFrame(tick);
   })();
 
-  /* ---------- 3. FALLING FLOWERS (desktop only) ---------- */
+  /* ---------- 3. FALLING FLOWERS (desktop only) ----------
+     Each flower belongs to a "zone" (an empty patch of the page, measured from the
+     content around it) and remembers its relative spot inside that zone. On resize the
+     same flowers glide to their new spots instead of being re-scattered. If a zone gets
+     too skinny, its extra flowers fade out, and they fade back in when there's room. */
   (function () {
     var layer = document.querySelector('.dp-petals');
     if (!layer) return;
     var NS = 'http://www.w3.org/2000/svg';
     var COLORS = [['#e85c6a', '#ffd84a'], ['#d4466a', '#ffd84a'], ['#ec6f58', '#ffe08a'], ['#c95078', '#ffd84a']];
-    var flowers = [];
+    var flowers = [], built = false, landed = false;
 
     function box(sel, textOnly) {
       var n = document.querySelector(sel); if (!n) return null;
@@ -83,7 +87,8 @@
       else r = n.getBoundingClientRect();
       return { l: r.left + scrollX, r: r.right + scrollX, t: r.top + scrollY, b: r.bottom + scrollY };
     }
-    function flower(size, c) {
+    function navBottom() { var n = document.querySelector('.navbar'); return n ? n.getBoundingClientRect().bottom + scrollY : 64; }
+    function flowerSvg(size, c) {
       var svg = document.createElementNS(NS, 'svg');
       svg.setAttribute('width', size * 2); svg.setAttribute('height', size * 2);
       svg.setAttribute('viewBox', (-size) + ' ' + (-size) + ' ' + size * 2 + ' ' + size * 2);
@@ -98,67 +103,83 @@
       var d = document.createElementNS(NS, 'circle'); d.setAttribute('r', size * .2); d.setAttribute('fill', c[1]); svg.appendChild(d);
       return svg;
     }
-    function navBottom() { var n = document.querySelector('.navbar'); return n ? n.getBoundingClientRect().bottom + scrollY : 64; }
 
-    function place() {
-      layer.innerHTML = ''; flowers = [];
-      if (window.innerWidth <= 820) return;
-      var top = navBottom();
+    /* The empty zones, measured fresh from the page every time the layout changes.
+       [xMin, xMax, yMin, yMax, wanted, alwaysShow] */
+    function zones() {
+      var W = document.documentElement.clientWidth, top = navBottom(), edge = 28;
       var title = box('.dp-hero-text h1', true), links = box('.dp-jump a:last-child'), arch = box('.dp-hero-photo');
-      var fp = box('.dp-faq-photo img'), faq = box('.dp-faq'), travH = box('.dp-travel h2', true), soon = box('.dp-soon', true);
-      var W = document.documentElement.clientWidth, rt = box('.dp-registry-text'), rp = box('.dp-registry-photo'), btn = box('.dp-btn');
-      var gap = (title.r + arch.l) / 2, fh = faq.b - faq.t;
-      // Spread flowers across the whole width: the open side margins get most of them,
-      // the middle gets a few. Positions are relative to the content edges so they adapt to any screen.
+      var heroB = box('.dp-hero').b, faq = box('.dp-faq'), grid = box('.dp-faq-grid');
+      var fpEl = document.querySelector('.dp-faq-photo img'), fpR = fpEl.getBoundingClientRect();
+      var shift = (document.querySelector('.dp-faq-photo').style.transform.match(/,\s*(-?[\d.]+)px/) || [0, 0])[1] * 1;
+      var fp = { l: fpR.left + scrollX, r: fpR.right + scrollX, t: fpR.top + scrollY - shift, b: fpR.bottom + scrollY - shift };
+      var bubbleL = grid.l + (grid.r - grid.l) * .4;
+      var travH = box('.dp-travel h2', true), soon = box('.dp-soon', true);
+      var rt = box('.dp-registry-text'), rp = box('.dp-registry-photo'), btn = box('.dp-btn'), regB = box('.dp-registry').b;
+      var archR = arch.r + 16;
+      return [
+        [title.r + 55, arch.l - 45, top + 30, heroB - 30, 4, true],     // the gap beside the title always gets 4
+        [title.l, links.r + 60, links.b + 40, heroB - 20, 1],
+        [title.l, title.r, top + 24, title.t - 10, 1],
+        [edge, title.l - 40, top + 30, heroB - 40, 3],
+        [archR + 40, W - edge, top + 30, heroB - 40, 3],
+        [edge, bubbleL - 40, faq.t + 10, fp.t - 20, 1],                // FAQs: never inside the bubble
+        [edge, fp.l - 30, faq.t + 20, faq.b - 40, 2],
+        [fp.r + 24, bubbleL - 30, faq.t + 20, faq.b - 60, 2],
+        [edge, bubbleL - 40, fp.b + 20, faq.b - 20, 1],
+        [edge, travH.l - 60, travH.t - 30, soon.b + 70, 3],
+        [travH.r + 60, W - edge, travH.t - 30, soon.b + 70, 3],
+        [edge, rt.l - 30, rp.t, regB - 40, 2],
+        [rp.r + 30, W - edge, rp.t - 20, regB - 40, 2],
+        [rt.l, rp.l - 30, btn.b + 30, regB - 40, 2]
+      ];
+    }
+
+    /* Create every flower once, each with a fixed relative spot in its zone */
+    function build() {
+      layer.innerHTML = ''; flowers = [];
       var seed = 11; function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
-      var spots = [];
-      function band(xMin, xMax, yMin, yMax, count, gapMin) {          // scatter flowers in a zone, kept apart
-        if (yMax - yMin < 30) return;
-        if (!gapMin) count = Math.min(count, Math.floor((xMax - xMin) / 70)); else if (xMax - xMin < 40) return;   // skinny margins get none, so nothing gets squeezed
-        if (count <= 0) return;
-        var placed = [];
-        for (var n = 0, tries = 0; n < count && tries < 80; tries++) {
-          var x = xMin + rnd() * (xMax - xMin), y = yMin + rnd() * (yMax - yMin), ok = true;
-          for (var k = 0; k < spots.length; k++) { var dx = spots[k][0] - x, dy = spots[k][1] - y; var md = gapMin || 110; if (dx * dx + dy * dy < md * md) { ok = false; break; } }
+      var Z = zones(), i = 0;
+      Z.forEach(function (z, zi) {
+        var w = Math.max(z[1] - z[0], 160), h = Math.max(z[3] - z[2], 60), md = z[5] ? 95 : 110, mine = [];
+        for (var n = 0, tries = 0; n < z[4] && tries < 80; tries++) {
+          var fx = rnd(), fy = rnd(), ok = true;
+          for (var k = 0; k < mine.length; k++) { var dx = (mine[k][0] - fx) * w, dy = (mine[k][1] - fy) * h; if (dx * dx + dy * dy < md * md) { ok = false; break; } }
           if (!ok) continue;
-          spots.push([x, y, 8 + Math.round(rnd() * 5), Math.floor(rnd() * 4)]); n++;
+          mine.push([fx, fy]);
+          var size = Math.round((8 + Math.round(rnd() * 5)) * 1.3);
+          var wrap = document.createElement('div'); wrap.className = 'dp-flower';
+          var svg = flowerSvg(size, COLORS[Math.floor(rnd() * 4)]);
+          wrap.appendChild(svg); layer.appendChild(wrap);
+          flowers.push({ wrap: wrap, svg: svg, zone: zi, rank: n, fx: fx, fy: fy, size: size, i: i++, x: 0, y: 0 });
+          n++;
         }
-      }
-      var heroB = box('.dp-hero').b, faqList = box('.dp-faq-list'), regB = box('.dp-registry').b;
-      var bubbleL = box('.dp-faq-grid').l + box('.dp-faq-grid').r * 0 + (box('.dp-faq-grid').r - box('.dp-faq-grid').l) * .4;
-      var archR = arch.r + 16, edge = 28;
-      // top section: the open gap between the title and the photo gets the most
-      band(title.r + 55, arch.l - 45, top + 30, heroB - 30, 4, 95);   // the gap beside the title always gets 4
-      band(title.l, links.r + 60, links.b + 40, heroB - 20, 1);
-      band(title.l, title.r, top + 24, title.t - 10, 1);
-      band(edge, title.l - 40, top + 30, heroB - 40, 3);
-      band(archR + 40, W - edge, top + 30, heroB - 40, 3);
-      // FAQs: only outside the bubble (left column), never inside it
-      band(edge, bubbleL - 40, faq.t + 10, fp.t - 20, 1);
-      band(edge, fp.l - 30, faq.t + 20, faq.b - 40, 2);
-      band(fp.r + 24, bubbleL - 30, faq.t + 20, faq.b - 60, 2);
-      band(edge, bubbleL - 40, fp.b + 20, faq.b - 20, 1);
-      // Travel: both sides of the heading
-      band(edge, travH.l - 60, travH.t - 30, soon.b + 70, 3);
-      band(travH.r + 60, W - edge, travH.t - 30, soon.b + 70, 3);
-      // Registry: outer margins + under the button
-      band(edge, rt.l - 30, rp.t, regB - 40, 2);
-      band(rp.r + 30, W - edge, rp.t - 20, regB - 40, 2);
-      band(rt.l, rp.l - 30, btn.b + 30, regB - 40, 2);
-      spots.forEach(function (sp, i) {
-        var size = Math.round(sp[2] * 1.3), f = flower(size, COLORS[sp[3]]);
-        f.style.left = (sp[0] - size) + 'px'; f.style.top = (sp[1] - size) + 'px';
-        layer.appendChild(f);
-        flowers.push({ el: f, y: sp[1], i: i });
+      });
+      built = true;
+    }
+
+    /* Put each flower at its spot for the current layout; hide extras in skinny zones */
+    function layout() {
+      var Z = zones();
+      flowers.forEach(function (fl) {
+        var z = Z[fl.zone], width = z[1] - z[0], height = z[3] - z[2];
+        var room = z[5] ? (width >= 40 ? z[4] : 0) : Math.min(z[4], Math.floor(width / 70));
+        var show = height >= 30 && fl.rank < room;
+        var W = document.documentElement.clientWidth;
+        fl.x = Math.min(Math.max(z[0] + fl.fx * Math.max(width, 0), fl.size), W - fl.size); fl.y = z[2] + fl.fy * Math.max(height, 0);
+        fl.wrap.style.left = (fl.x - fl.size) + 'px';
+        fl.wrap.style.top = (fl.y - fl.size) + 'px';
+        fl.wrap.style.opacity = show ? 1 : 0;
       });
     }
+
     function drop(fl, top) {
       var rot = (fl.i * 47) % 360, end = rot + ((fl.i % 2) ? 110 : -130);
-      if (reduceMotion || !fl.el.animate) { fl.el.style.opacity = 1; fl.el.style.transform = 'rotate(' + end + 'deg)'; return; }
+      if (reduceMotion || !fl.svg.animate) { fl.svg.style.opacity = 1; fl.svg.style.transform = 'rotate(' + end + 'deg)'; return; }
       var fall = Math.min(fl.y - top + 20, 230), sway = 10 + (fl.i * 7) % 12;
       var delay = (fl.y - top) * 1.5 + (fl.i * 137) % 260;   // the wave moves down the page
       var dur = 1900 + (fl.i * 211) % 700;
-      fl.el.animate([
+      fl.svg.animate([
         { opacity: 0, transform: 'translate(0,' + (-fall) + 'px) rotate(' + rot + 'deg)' },
         { opacity: 1, offset: .2, transform: 'translate(' + sway + 'px,' + (-fall * .75) + 'px) rotate(' + (rot + (end - rot) * .25) + 'deg)' },
         { offset: .55, transform: 'translate(' + (-sway) + 'px,' + (-fall * .35) + 'px) rotate(' + (rot + (end - rot) * .6) + 'deg)' },
@@ -166,14 +187,33 @@
         { opacity: 1, transform: 'translate(0,0) rotate(' + end + 'deg)' }
       ], { duration: dur, delay: delay, easing: 'cubic-bezier(.3,.1,.3,1)', fill: 'forwards' });
     }
-    function showAll() { flowers.forEach(function (fl) { fl.el.style.opacity = 1; fl.el.style.transform = 'rotate(' + ((fl.i * 47) % 360) + 'deg)'; }); }
+    function showLanded() {
+      flowers.forEach(function (fl) { fl.svg.style.opacity = 1; fl.svg.style.transform = 'rotate(' + ((fl.i * 47) % 360 + ((fl.i % 2) ? 110 : -130)) + 'deg)'; });
+    }
+    function isDesktop() { return window.innerWidth > 820; }
 
     window.addEventListener('load', function () {
-      place();
+      if (!isDesktop()) return;                       // phones: no flowers
+      build(); layout();
+      requestAnimationFrame(function () { layer.classList.add('dp-ready'); });   // turn on gliding after the first placement
       var top = navBottom();
-      setTimeout(function () { flowers.forEach(function (fl) { drop(fl, top); }); }, 300);
+      setTimeout(function () { flowers.forEach(function (fl) { drop(fl, top); }); landed = true; }, 300);
     });
-    var t;
-    window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(function () { place(); showAll(); }, 200); });
+
+    // While the window is being resized, keep the flowers tracking their spots (once per frame)
+    var pending = false;
+    window.addEventListener('resize', function () {
+      if (pending) return; pending = true;
+      requestAnimationFrame(function () {
+        pending = false;
+        if (!isDesktop()) return;                     // the CSS hides the layer on phones
+        if (!built) { build(); showLanded(); layer.classList.add('dp-ready'); }
+        layout();
+      });
+    });
+    // Opening an FAQ answer changes the page height, so nudge the lower flowers along with it
+    document.querySelectorAll('.dp-faq-item summary').forEach(function (s) {
+      s.addEventListener('click', function () { if (built) setTimeout(layout, 380); });
+    });
   })();
 })();
