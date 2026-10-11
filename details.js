@@ -118,7 +118,7 @@
         fx: rnd(),                                           // horizontal spot as a share of the width
         y: startAbove ? navLine() - 30 : navLine() + rnd() * (H - navLine()),
         r: r, ci: Math.floor(rnd() * 4), depth: depth,
-        speed: (26 + rnd() * 22) * depth,                    // px per second, steady
+        speed: (26 + rnd() * 22) * depth * (W <= 820 ? 1.9 : 1),   // px per second, steady (a bit quicker on phones' shorter screens)
         sway: 10 + rnd() * 22, swaySpeed: .35 + rnd() * .5, phase: rnd() * Math.PI * 2,
         rot: rnd() * Math.PI * 2, spin: (rnd() - .5) * .9, alpha: .55 + depth * .4
       };
@@ -198,14 +198,15 @@
     // screen within a couple of seconds, then settles into the slow steady rain.
     flowers = [];
     for (var i = 0, n = wanted(); i < n; i++) {
-      var f0 = makeFlower(true), line0 = navLine(), y0 = line0 - f0.r * 1.3;
+      var f0 = makeFlower(true), line0 = navLine(), y0 = line0 - f0.r * 1.3;   // fully tucked under the nav until its turn
       var target = line0 + 20 + rnd() * (H - line0 - 20);
       f0.y = y0;
-      if (i % 2 === 0) {                                   // half do the opening shower...
+      if (W > 820 && i % 2 === 0) {                        // laptops: half do the opening shower...
         f0.intro = { age: 0, delay: (i / n) * 0.9 + rnd() * 0.25, dur: 1.1 + rnd() * 1.1, y0: y0, dist: target - y0 };
       } else {                                             // ...the rest trickle out from under the nav one by one, so the top never empties
-        var k = (i - 1) / 2, streamN = Math.floor(n / 2);   // evenly spaced start times, so no clumps
-        f0.intro = { age: 0, delay: 0.5 + (k + rnd() * .6) / streamN * (H - line0) / 32, dur: 0.001, y0: y0, dist: 0 };
+        // phones: every flower just falls from the nav line at the normal pace, the first ones right away
+        var phone = W <= 820, k = phone ? i : (i - 1) / 2, streamN = phone ? n : Math.floor(n / 2);
+        f0.intro = { age: 0, delay: (phone ? 0 : 0.5) + (k + (phone && k === 0 ? 0 : rnd() * .6)) / streamN * (H - line0) / (phone ? 60 : 32), dur: 0.001, y0: y0, dist: 0 };
       }
       flowers.push(f0);
     }
