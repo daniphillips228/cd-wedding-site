@@ -83,7 +83,9 @@
     var ctx = canvas.getContext('2d');
     var COLORS = [['#e85c6a', '#ffd84a'], ['#d4466a', '#ffd84a'], ['#ec6f58', '#ffe08a'], ['#c95078', '#ffd84a']];
     var bubble = document.querySelector('.dp-faq-grid > div'), footer = document.querySelector('.site-footer');
-    var W = 0, H = 0, dpr = 1, flowers = [], sprites = {}, last = null, running = false, fadeStart = null, FADE = 0.3;
+    var W = 0, H = 0, dpr = 1, flowers = [], sprites = {}, last = null, running = false;
+    var nav = document.querySelector('.navbar');
+    function navLine() { return nav ? Math.max(nav.getBoundingClientRect().bottom, 0) : 0; }   // the bottom of the tan nav bar
 
     function seededRandom(seed) { return function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
     var rnd = seededRandom(7);
@@ -114,7 +116,7 @@
       var r = Math.round((7 + rnd() * 5) * depth * 1.25 * scale());
       return {
         fx: rnd(),                                           // horizontal spot as a share of the width
-        y: startAbove ? -rnd() * H - 20 : rnd() * H,
+        y: startAbove ? navLine() - 30 : navLine() + rnd() * (H - navLine()),
         r: r, ci: Math.floor(rnd() * 4), depth: depth,
         speed: (26 + rnd() * 22) * depth,                    // px per second, steady
         sway: 10 + rnd() * 22, swaySpeed: .35 + rnd() * .5, phase: rnd() * Math.PI * 2,
@@ -143,13 +145,12 @@
     }
 
     function draw(t) {
-      if (fadeStart === null) fadeStart = t;
-      var fade = reduceMotion ? 1 : Math.min((t - fadeStart) / FADE, 1);   // gentle fade-in when the page opens
       ctx.clearRect(0, 0, W, H);
       var limit = H;
       if (footer) { var fr = footer.getBoundingClientRect(); limit = Math.min(H, fr.top); }
       ctx.save();
-      ctx.beginPath(); ctx.rect(0, 0, W, Math.max(limit, 0));
+      var line = navLine();
+      ctx.beginPath(); ctx.rect(0, line, W, Math.max(limit - line, 0));   // flowers only show below the nav line
       holeRects().forEach(function (b) {
         var rad = Math.min(parseFloat(getComputedStyle(bubble).borderTopLeftRadius) || 0, b.height / 2, b.width / 2);
         ctx.moveTo(b.left + rad, b.top); ctx.lineTo(b.right, b.top); ctx.lineTo(b.right, b.bottom); ctx.lineTo(b.left, b.bottom);
@@ -158,7 +159,7 @@
       ctx.clip('evenodd');
       flowers.forEach(function (f) {
         var sp = sprite(f.ci, f.r), x = f.fx * W + Math.sin(t * f.swaySpeed + f.phase) * f.sway;
-        ctx.globalAlpha = f.alpha * fade;
+        ctx.globalAlpha = f.alpha;
         ctx.save(); ctx.translate(x, f.y); ctx.rotate(f.rot);
         ctx.drawImage(sp.img, -sp.size / 2, -sp.size / 2, sp.size, sp.size);
         ctx.restore();
@@ -170,9 +171,18 @@
       var dt = last === null ? 0 : Math.min((ts - last) / 1000, .05); last = ts;
       var t = ts / 1000;
       flowers.forEach(function (f) {
-        f.y += f.speed * dt; f.rot += f.spin * dt;
+        f.rot += f.spin * dt;
+        if (f.intro) {                                       // opening shower: drop quickly to a spot, then keep drifting
+          var it = f.intro; it.age += dt;
+          var a = it.age - it.delay;
+          if (a <= 0) { f.y = it.y0; return; }
+          var p = a / it.dur;
+          if (p < 1) { f.y = it.y0 + it.dist * (1 - (1 - p) * (1 - p)) + f.speed * a; return; }   // ends at cruising speed, no hitch
+          f.y = it.y0 + it.dist + f.speed * a; f.intro = null; return;
+        }
+        f.y += f.speed * dt;
         if (f.y - f.r * 2 > H) {                             // drifted off the bottom: start again at the top
-          var nf = makeFlower(true); nf.y = -nf.r * 2 - rnd() * 60;
+          var nf = makeFlower(true); nf.y = navLine() - nf.r * 1.3 - rnd() * 40;
           for (var k in nf) f[k] = nf[k];
         }
       });
@@ -182,11 +192,24 @@
     function start() { if (running) return; running = true; last = null; requestAnimationFrame(tick); }
 
     resize();
-    // Start already spread across the screen (a few just above the top) so the rain is there right away
-    flowers = []; for (var i = 0, n = wanted(); i < n; i++) { var f0 = makeFlower(false); f0.y = -40 + rnd() * (H + 40); flowers.push(f0); }
+    // On load, every flower starts just under the nav line and showers down, filling the
+    // screen within a couple of seconds, then settles into the slow steady rain.
+    flowers = [];
+    for (var i = 0, n = wanted(); i < n; i++) {
+      var f0 = makeFlower(true), line0 = navLine(), y0 = line0 - f0.r * 1.3;
+      var target = line0 + 20 + rnd() * (H - line0 - 20);
+      f0.y = y0;
+      if (i % 2 === 0) {                                   // half do the opening shower...
+        f0.intro = { age: 0, delay: (i / n) * 0.9 + rnd() * 0.25, dur: 1.1 + rnd() * 1.1, y0: y0, dist: target - y0 };
+      } else {                                             // ...the rest trickle out from under the nav one by one, so the top never empties
+        var k = (i - 1) / 2, streamN = Math.floor(n / 2);   // evenly spaced start times, so no clumps
+        f0.intro = { age: 0, delay: 0.5 + (k + rnd() * .6) / streamN * (H - line0) / 32, dur: 0.001, y0: y0, dist: 0 };
+      }
+      flowers.push(f0);
+    }
 
     if (reduceMotion) {                                      // still scatter, no motion
-      flowers.forEach(function (f) { f.y = rnd() * H; });
+      flowers.forEach(function (f) { f.intro = null; f.y = navLine() + rnd() * (H - navLine()); });
       var still = function () { draw(0); };
       still(); window.addEventListener('scroll', still, { passive: true });
       window.addEventListener('resize', function () { resize(); still(); });
