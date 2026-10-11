@@ -83,7 +83,7 @@
     var ctx = canvas.getContext('2d');
     var COLORS = [['#e85c6a', '#ffd84a'], ['#d4466a', '#ffd84a'], ['#ec6f58', '#ffe08a'], ['#c95078', '#ffd84a']];
     var bubble = document.querySelector('.dp-faq-grid > div'), footer = document.querySelector('.site-footer');
-    var W = 0, H = 0, dpr = 1, flowers = [], sprites = {}, last = null, running = false, fadeStart = null, FADE = 1.2;
+    var W = 0, H = 0, dpr = 1, flowers = [], sprites = {}, last = null, running = false, fadeStart = null, FADE = 0.3;
 
     function seededRandom(seed) { return function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
     var rnd = seededRandom(7);
